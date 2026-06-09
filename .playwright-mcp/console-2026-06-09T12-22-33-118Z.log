@@ -1,0 +1,4 @@
+[     214ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:8080/VAADIN/build/indexhtml-fKkZfT-U.js:66277
+[     748ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ http://localhost:8080/styles/home-view.css:0
+[     749ms] [ERROR] Error loading http://localhost:8080/styles/home-view.css @ http://localhost:8080/main:7
+[     749ms] [ERROR] 'http://localhost:8080/styles/home-view.css' could not be loaded. @ http://localhost:8080/main:7

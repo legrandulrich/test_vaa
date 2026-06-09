@@ -1,0 +1,379 @@
+/* ====================================================================
+   app.css — feuille de style unique de l'application SIRUL (ORPV).
+
+   Regroupe l'ensemble des styles auparavant éclatés en plusieurs
+   fichiers. Tout est scopé par classe ; chaque vue importe cette seule
+   feuille via @StyleSheet("styles/app.css").
+
+   SOMMAIRE
+     1. Tokens partagés (palette / variables)         :root
+     2. Coquille applicative (fond commun)            .orpv-view
+     3. AppHeader (en-tête blanc + logo)              .app-header*
+     4. MainLayout (contenu + barre d'état)           .app-content / .app-statusbar*
+     5. Barre de menu + onglets fermables (HomeView)  .orpv-menubar / .orpv-menu-item / .orpv-main-* / .orpv-tab-*
+     6. AcceuilView (écran d'accueil « splash »)      .acceuil-*
+     7. GopView (corps de formulaire)                 .orpv-body / champs / onglets internes
+   ==================================================================== */
+
+
+/* ====================================================================
+   1. TOKENS PARTAGÉS
+   Palette et variables référencées via var(...) dans tous les blocs,
+   afin de centraliser l'identité visuelle en un seul endroit.
+   ==================================================================== */
+:root {
+    /* Surfaces */
+    --orpv-app-bg: #c4cdd8;            /* fond de l'application */
+    --orpv-panel-bg: #ece9e2;          /* fond des panneaux / zones d'onglets */
+    --orpv-panel-border: #7f8a99;      /* bordure des panneaux */
+    --orpv-panel-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+
+    /* Champs et boutons */
+    --orpv-field-border: #9aa3b0;      /* bordure des champs et boutons */
+    --orpv-lookup-bg: #dfe1e6;         /* fond du bouton loupe / liste */
+    --orpv-lookup-color: #44515f;      /* icône du bouton loupe / liste */
+
+    /* Onglets internes d'un formulaire */
+    --orpv-inner-tabs-bg: #f4f3ee;
+    --orpv-inner-tabs-border: #b8bcc4;
+
+    /* Texte */
+    --orpv-text: #2b2b2b;              /* texte principal */
+    --orpv-text-muted: #6b7280;        /* texte secondaire */
+
+    /* Barre de menu et onglets fermables (HomeView) */
+    --orpv-menubar-bg: linear-gradient(180deg, #2c4274 0%, #14233f 100%);
+    --orpv-menu-color: #e8edf6;
+    --orpv-tab-close-color: #8a939f;
+    --orpv-tab-close-hover: #c0392b;
+
+    /* En-tête de l'accueil */
+    --orpv-header-bg: #ffffff;
+    --orpv-header-border: #b9bfc9;
+
+    /* Barre d'état commune (MainLayout) */
+    --orpv-statusbar-bg: #e7e4dd;
+    --orpv-statusbar-border: #b9bfc9;
+    --orpv-statusbar-text: #3a3a3a;
+
+    /* Actions */
+    --orpv-danger: #e23b3b;            /* bouton « Quitter » */
+    --orpv-success: #36a84d;           /* bouton « Continuer » */
+}
+
+
+/* ====================================================================
+   2. COQUILLE APPLICATIVE
+   Fond gris commun de l'application (porté par MainLayout).
+   ==================================================================== */
+.orpv-view {
+    background: var(--orpv-app-bg);
+    box-sizing: border-box;
+}
+
+
+/* ====================================================================
+   3. APP HEADER
+   En-tête commun (logo Université Laval + intitulé) : barre blanche
+   pleine largeur, responsive.
+   ==================================================================== */
+.app-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px clamp(12px, 3vw, 28px);
+    background: var(--orpv-header-bg);
+    border-bottom: 1px solid var(--orpv-header-border);
+}
+
+.app-header-logo {
+    height: clamp(38px, 6vw, 54px);
+    width: auto;
+}
+
+.app-header-title {
+    font-size: clamp(15px, 2.2vw, 20px);
+    color: var(--orpv-text);
+}
+
+
+/* ====================================================================
+   4. MAIN LAYOUT
+   Mise en page racine : zone de contenu (vues routées) + barre d'état
+   partagée en bas de toutes les vues.
+   ==================================================================== */
+
+/* Zone de contenu : occupe l'espace restant et défile si nécessaire.
+   En flex-column pour que la vue enfant remplisse toute la hauteur. */
+.app-content {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+/* Barre d'état commune en bas de toutes les vues. */
+.app-statusbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 3px 12px;
+    font-size: 12px;
+    background: var(--orpv-statusbar-bg);
+    border-top: 1px solid var(--orpv-statusbar-border);
+    color: var(--orpv-statusbar-text);
+}
+
+.app-statusbar-message {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.app-statusbar-info {
+    flex-shrink: 0;
+    opacity: 0.85;
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* ====================================================================
+   5. BARRE DE MENU + ONGLETS FERMABLES (HOME VIEW)
+   Cadre applicatif : barre de menu sombre en en-tête et zone d'onglets
+   fermables.
+   ==================================================================== */
+
+/* --- Barre de menu sombre --- */
+.orpv-menubar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 3px 8px;
+    gap: 2px;
+    background: var(--orpv-menubar-bg);
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+
+.orpv-menu-item {
+    color: var(--orpv-menu-color);
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 3px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.orpv-menu-item:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.orpv-menu-item:active {
+    background: rgba(0, 0, 0, 0.25);
+}
+
+/* --- Corps : conteneur des onglets --- */
+.orpv-main-body {
+    padding: 14px;
+    box-sizing: border-box;
+}
+
+.orpv-main-tabs {
+    height: 100%;
+    box-sizing: border-box;
+    background: var(--orpv-panel-bg);
+    border: 1px solid var(--orpv-panel-border);
+    border-radius: 5px;
+    box-shadow: var(--orpv-panel-shadow);
+}
+
+.orpv-main-tabs::part(content) {
+    overflow: auto;
+}
+
+/* --- En-tête d'onglet : libellé + bouton de fermeture --- */
+.orpv-tab-close {
+    color: var(--orpv-tab-close-color);
+}
+
+.orpv-tab-close:hover {
+    color: var(--orpv-tab-close-hover);
+}
+
+.orpv-tab-label {
+    height: 1em;
+    line-height: 1;
+}
+
+.orpv-tab-header {
+    height: 20px;
+}
+
+
+/* ====================================================================
+   6. ACCUEIL VIEW
+   Écran d'accueil SIRUL (splash), responsive. Couleurs issues des
+   tokens ci-dessus.
+   ==================================================================== */
+.acceuil-view {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Corps de l'accueil : occupe l'espace restant et accueille soit le contenu
+   central (splash), soit les onglets ouverts depuis la barre de menu. */
+.acceuil-corps {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Conteneur des onglets fermables ouverts depuis l'accueil. */
+.acceuil-onglets {
+    flex: 1;
+    min-height: 0;
+    padding: 14px;
+    box-sizing: border-box;
+}
+
+/* Zone centrale : occupe tout l'espace restant et centre son contenu. */
+.acceuil-centre {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    box-sizing: border-box;
+}
+
+.acceuil-bloc-central {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 720px;
+    width: 100%;
+}
+
+.acceuil-titre {
+    margin: 0 0 6px;
+    font-size: clamp(52px, 12vw, 120px);
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: #6f7785;
+    line-height: 1;
+}
+
+.acceuil-soustitre {
+    margin: 0;
+    font-size: clamp(18px, 3.4vw, 30px);
+    color: #5d6470;
+    line-height: 1.3;
+}
+
+/* Boutons d'action, centrés (passent à la ligne sur petit écran). */
+.acceuil-boutons {
+    margin-top: 30px;
+    gap: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.acceuil-bouton-quitter,
+.acceuil-bouton-continuer {
+    min-width: 160px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Le variant LUMO_PRIMARY utilise --lumo-primary-color : on le surcharge
+   par bouton pour obtenir le rouge / vert de la maquette. */
+.acceuil-bouton-quitter {
+    --lumo-primary-color: var(--orpv-danger);
+    --lumo-primary-text-color: #ffffff;
+}
+
+.acceuil-bouton-continuer {
+    --lumo-primary-color: var(--orpv-success);
+    --lumo-primary-text-color: #ffffff;
+}
+
+
+/* ====================================================================
+   7. GOP VIEW
+   Corps du formulaire « Gestion des organismes pourvoyeurs » : sections
+   de saisie seules (ni fenêtre ni barre de titre), compact et
+   responsive. Réutilisé tel quel par HomeView dans un onglet.
+   ==================================================================== */
+
+/* Corps du formulaire — porte les variables de densité. */
+.orpv-body {
+    padding: 16px 18px 20px;
+
+    /* Aspect compact, coins peu arrondis, champs blancs encadrés */
+    --lumo-font-size-m: 13px;
+    --lumo-font-size-s: 12px;
+    --lumo-size-m: 1.9rem;
+    --lumo-border-radius-m: 3px;
+    --lumo-border-radius-s: 2px;
+    --lumo-space-m: 0.75rem;
+    --vaadin-input-field-border-width: 1px;
+    --vaadin-input-field-border-color: var(--orpv-field-border);
+    --vaadin-input-field-background: #ffffff;
+}
+
+.orpv-body > *:not(:last-child) {
+    margin-bottom: 14px;
+    display: block;
+}
+
+/* Petit bouton de recherche (loupe / liste) à droite des champs code */
+.orpv-lookup-button {
+    background: var(--orpv-lookup-bg);
+    border: 1px solid var(--orpv-field-border);
+    color: var(--orpv-lookup-color);
+    flex-shrink: 0;
+    min-width: var(--lumo-size-m);
+    cursor: pointer;
+}
+
+/* Libellés des cases à cocher (à gauche de la case) */
+.orpv-checkbox-label {
+    font-size: 13px;
+    color: var(--orpv-text);
+}
+
+/* Onglets internes (adresses, accréditation, remarque) */
+.orpv-tabs {
+    background: var(--orpv-inner-tabs-bg);
+    border: 1px solid var(--orpv-inner-tabs-border);
+    border-radius: 4px;
+}
+
+.orpv-tabs::part(content) {
+    padding: 16px;
+}
+
+.orpv-empty-tab {
+    color: var(--orpv-text-muted);
+    font-style: italic;
+    font-size: 13px;
+}
