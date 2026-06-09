@@ -1,0 +1,1 @@
+An expense management application with expense submission, approval workflows, receipt uploads, and reporting dashboards.
