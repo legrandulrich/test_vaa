@@ -345,6 +345,58 @@
     display: block;
 }
 
+/* --- Barre d'outils : 14 boutons-icônes façon application bureautique --- */
+/* Sélecteur préfixé par .orpv-body pour l'emporter sur la règle display:block
+   ci-dessus (même spécificité, déclarée après). */
+.orpv-body .orpv-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1px;
+    padding: 3px 5px;
+    background: linear-gradient(180deg, #f3f1ea 0%, #dcd7ca 100%);
+    border: 1px solid #b7b1a3;
+    border-radius: 3px;
+    box-shadow: inset 0 1px 0 #fffdf8;
+}
+
+.orpv-tool-button {
+    width: 30px;
+    min-width: 30px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.orpv-tool-button:hover {
+    border-color: #8aa6d4;
+    background: #eaf1fb;
+}
+
+.orpv-tool-button:active {
+    border-color: #6f8fc4;
+    background: #d7e2f4;
+}
+
+/* Icône SVG (servie depuis /icons) : taille fixe, couleurs d'origine. */
+.orpv-tool-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+/* Séparateur vertical entre groupes de boutons. */
+.orpv-toolbar-sep {
+    width: 1px;
+    height: 22px;
+    margin: 0 5px;
+    background: #b0a99c;
+    box-shadow: 1px 0 0 #fffdf8;
+}
+
 /* Petit bouton de recherche (loupe / liste) à droite des champs code */
 .orpv-lookup-button {
     background: var(--orpv-lookup-bg);

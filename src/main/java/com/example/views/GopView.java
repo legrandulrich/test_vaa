@@ -2,6 +2,8 @@ package com.example.views;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -11,6 +13,7 @@ import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep.LabelsPosition;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
@@ -90,6 +93,110 @@ public class GopView extends Div {
         MainLayout.rechercher(this)
                 .ifPresent(layout -> layout.getStatusBar()
                         .setMessage("Gestion des organismes pourvoyeurs | Prêt"));
+    }
+
+    // ------------------------------------------------------------------
+    // Barre d'outils
+    // ------------------------------------------------------------------
+
+    /**
+     * Barre d'outils façon application bureautique : 14 boutons-icônes
+     * regroupés (fichier / édition / navigation / enregistrements / requête).
+     * Chaque bouton porte une info-bulle décrivant sa fonction et son
+     * raccourci clavier, lequel déclenche le clic du bouton.
+     */
+    private Component creerToolBar() {
+        Div barre = new Div(
+                // 1 à 3 — fichier
+                boutonOutil("quitter",
+                        "Quitter l'application en cours et revenir à la page précédente ou à la page d'accueil (Ctrl+Q)",
+                        Key.KEY_Q, KeyModifier.CONTROL),
+                boutonOutil("enregistrer",
+                        "Enregistrer les changements effectués à une entente de financement (F10)",
+                        Key.F10),
+                boutonOutil("imprimer",
+                        "Imprimer la fenêtre courante (Maj+F8)",
+                        Key.F8, KeyModifier.SHIFT),
+                separateur(),
+                // 4 à 7 — édition
+                boutonOutil("couper",
+                        "Couper le texte sélectionné (Ctrl+X)",
+                        Key.KEY_X, KeyModifier.CONTROL),
+                boutonOutil("copier",
+                        "Copier le texte sélectionné (Ctrl+C)",
+                        Key.KEY_C, KeyModifier.CONTROL),
+                boutonOutil("coller",
+                        "Coller le texte sélectionné (Ctrl+V)",
+                        Key.KEY_V, KeyModifier.CONTROL),
+                boutonOutil("editer",
+                        "Éditer le contenu du champ de la zone de texte où le curseur est positionné (Ctrl+E)",
+                        Key.KEY_E, KeyModifier.CONTROL),
+                separateur(),
+                // 8 à 11 — navigation entre enregistrements
+                boutonOutil("premier",
+                        "Aller au premier enregistrement"),
+                boutonOutilNavigation("precedent",
+                        "Aller à l'enregistrement précédent (Flèche haut)",
+                        Key.ARROW_UP),
+                boutonOutilNavigation("suivant",
+                        "Aller à l'enregistrement suivant (Flèche bas)",
+                        Key.ARROW_DOWN),
+                boutonOutil("dernier",
+                        "Aller au dernier enregistrement"),
+                separateur(),
+                // 12 à 13 — enregistrements
+                boutonOutil("nouveau",
+                        "Créer un nouvel enregistrement (F6)",
+                        Key.F6),
+                boutonOutil("detruire",
+                        "Détruire ou effacer l'enregistrement courant identifié par le curseur (Maj+F6)",
+                        Key.F6, KeyModifier.SHIFT),
+                separateur(),
+                // 14 — interrogation
+                boutonOutil("interroger",
+                        "Lancer le mode d'interrogation (F7)",
+                        Key.F7));
+        barre.addClassName("orpv-toolbar");
+        return barre;
+    }
+
+    /** Bouton-icône (sans raccourci) : l'icône SVG est servie depuis /icons. */
+    private Button boutonOutil(String icone, String infoBulle) {
+        Image image = new Image("icons/" + icone + ".svg", infoBulle);
+        image.addClassName("orpv-tool-icon");
+        Button bouton = new Button(image);
+        bouton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY,
+                ButtonVariant.LUMO_SMALL);
+        bouton.addClassName("orpv-tool-button");
+        bouton.setTooltipText(infoBulle);
+        bouton.setAriaLabel(infoBulle);
+        return bouton;
+    }
+
+    /** Bouton-icône dont le raccourci clavier déclenche le clic. */
+    private Button boutonOutil(String icone, String infoBulle, Key touche,
+            KeyModifier... modificateurs) {
+        Button bouton = boutonOutil(icone, infoBulle);
+        bouton.addClickShortcut(touche, modificateurs);
+        return bouton;
+    }
+
+    /**
+     * Bouton de navigation dont le raccourci est une flèche : on laisse le
+     * navigateur conserver son comportement par défaut (déplacement du curseur
+     * dans les champs) en plus du déclenchement du bouton.
+     */
+    private Button boutonOutilNavigation(String icone, String infoBulle, Key touche) {
+        Button bouton = boutonOutil(icone, infoBulle);
+        bouton.addClickShortcut(touche).allowBrowserDefault();
+        return bouton;
+    }
+
+    /** Séparateur vertical entre deux groupes de boutons. */
+    private Span separateur() {
+        Span sep = new Span();
+        sep.addClassName("orpv-toolbar-sep");
+        return sep;
     }
 
     /** Bloc supérieur : codes, nom, ville. */
