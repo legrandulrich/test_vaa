@@ -78,15 +78,30 @@
    pleine largeur, responsive.
    ==================================================================== */
 .app-header {
+    position: relative;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
     width: 100%;
     box-sizing: border-box;
-    padding: 10px clamp(12px, 3vw, 28px);
+    padding: 16px clamp(12px, 3vw, 28px) 10px;
     background: var(--orpv-header-bg);
     border-bottom: 1px solid var(--orpv-header-border);
+}
+
+/* Bande d'accent en haut de l'en-tête : moitié rouge, moitié jaune
+   (couleurs de l'Université Laval). */
+.app-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg,
+            var(--orpv-danger) 0 50%,
+            #f3c100 50% 100%);
 }
 
 .app-header-logo {
@@ -428,4 +443,58 @@
     color: var(--orpv-text-muted);
     font-style: italic;
     font-size: 13px;
+}
+
+
+/* ====================================================================
+   8. LOGIN VIEW
+   Écran de connexion : réutilise l'en-tête et le fond de l'accueil
+   (.acceuil-*) et y ajoute une carte de connexion centrée, responsive.
+   ==================================================================== */
+
+/* Titre SIRUL un peu plus sobre que le splash, pour laisser la carte
+   au premier plan. */
+.login-view .acceuil-titre {
+    font-size: clamp(40px, 9vw, 78px);
+}
+
+/* Carte blanche centrée contenant le formulaire de connexion. */
+.login-card {
+    width: 100%;
+    max-width: 440px;
+    margin-top: 22px;
+    background: #ffffff;
+    border: 1px solid var(--orpv-header-border);
+    border-radius: 8px;
+    box-shadow: var(--orpv-panel-shadow);
+    box-sizing: border-box;
+}
+
+/* Corps de la carte : padding fluide ; les champs s'empilent en pleine largeur.
+   text-align:left annule le centrage hérité de .acceuil-bloc-central, pour
+   aligner à gauche les libellés des champs et le texte saisi. */
+.login-card-corps {
+    width: 100%;
+    box-sizing: border-box;
+    padding: clamp(20px, 4vw, 34px);
+    gap: 14px;
+    text-align: left;
+}
+
+.login-card-titre {
+    margin: 0 0 4px;
+    text-align: center;
+    font-size: clamp(18px, 2.6vw, 24px);
+    font-weight: 600;
+    color: #444b56;
+}
+
+/* Bouton « Connexion » : pleine largeur, rouge (comme « Quitter »). */
+.login-bouton {
+    margin-top: 6px;
+    --lumo-primary-color: var(--orpv-danger);
+    --lumo-primary-text-color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
 }

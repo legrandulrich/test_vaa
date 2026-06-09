@@ -163,11 +163,15 @@ public class HomeView extends Div {
         zoneOnglets.setSelectedTab(onglet);
         ongletsOuverts.put(titre, onglet);
 
-        boutonFermer.addClickListener(event -> {
+        Runnable fermerOnglet = () -> {
             zoneOnglets.remove(onglet);
             ongletsOuverts.remove(titre);
             mettreAJourAffichage();
-        });
+        };
+        boutonFermer.addClickListener(event -> fermerOnglet.run());
+        if (contenu instanceof GopView gopView) {
+            gopView.setFermetureAction(fermerOnglet);
+        }
 
         mettreAJourAffichage();
     }

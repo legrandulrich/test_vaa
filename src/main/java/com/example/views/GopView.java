@@ -76,6 +76,9 @@ public class GopView extends Div {
     private TextField anneeFinActiviteField;
     private TextField moisFermetureField;
 
+    /** Action de fermeture de l'onglet hôte, injectée par {@link HomeView}. */
+    private Runnable fermetureAction;
+
     public GopView() {
         // HomeView est constitué uniquement du corps du formulaire :
         // on ajoute directement les sections de saisie, sans fenêtre ni titre.
@@ -108,9 +111,9 @@ public class GopView extends Div {
     private Component creerToolBar() {
         Div barre = new Div(
                 // 1 à 3 — fichier
-                boutonOutil("quitter",
+                boutonOutilAction("quitter",
                         "Quitter l'application en cours et revenir à la page précédente ou à la page d'accueil (Ctrl+Q)",
-                        Key.KEY_Q, KeyModifier.CONTROL),
+                        this::quitter, Key.KEY_Q, KeyModifier.CONTROL),
                 boutonOutil("enregistrer",
                         "Enregistrer les changements effectués à une entente de financement (F10)",
                         Key.F10),
@@ -181,6 +184,15 @@ public class GopView extends Div {
         return bouton;
     }
 
+    /** Bouton-icône avec une action au clic, en plus du raccourci clavier. */
+    private Button boutonOutilAction(String icone, String infoBulle, Runnable action,
+            Key touche, KeyModifier... modificateurs) {
+        Button bouton = boutonOutil(icone, infoBulle);
+        bouton.addClickListener(event -> action.run());
+        bouton.addClickShortcut(touche, modificateurs);
+        return bouton;
+    }
+
     /**
      * Bouton de navigation dont le raccourci est une flèche : on laisse le
      * navigateur conserver son comportement par défaut (déplacement du curseur
@@ -197,6 +209,26 @@ public class GopView extends Div {
         Span sep = new Span();
         sep.addClassName("orpv-toolbar-sep");
         return sep;
+    }
+
+    /**
+     * Définit l'action de « Quitter » : la fermeture de l'onglet hôte.
+     * Injectée par {@link HomeView} à l'ouverture de l'onglet.
+     */
+    public void setFermetureAction(Runnable fermetureAction) {
+        this.fermetureAction = fermetureAction;
+    }
+
+    /**
+     * « Quitter » : ferme l'onglet hôte s'il existe, sinon (vue ouverte seule
+     * via sa route) revient à l'écran d'accueil.
+     */
+    private void quitter() {
+        if (fermetureAction != null) {
+            fermetureAction.run();
+        } else {
+            getUI().ifPresent(ui -> ui.navigate(AcceuilView.class));
+        }
     }
 
     /** Bloc supérieur : codes, nom, ville. */
