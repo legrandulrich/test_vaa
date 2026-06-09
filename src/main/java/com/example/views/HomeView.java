@@ -4,6 +4,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -77,17 +78,51 @@ public class HomeView extends Div {
         gestionUnitesItem.addClickListener(event ->
                 ouvrirOnglet(TITRE_GESTION_UNITES, new GopView()));
 
+        Span pilotageItem = elementMenu("Pilotage");
+        attacherMenuPilotage(pilotageItem);
+
         Div barre = new Div(
                 elementMenu("Fichier"),
                 elementMenu("Projet"),
                 elementMenu("Chercheur"),
                 elementMenu("Grp. recherche"),
                 gestionUnitesItem,
-                elementMenu("Pilotage"),
+                pilotageItem,
                 elementMenu("Fenêtre"),
                 elementMenu("Aide"));
         barre.addClassName("orpv-menubar");
         return barre;
+    }
+
+    /**
+     * Attache à l'élément « Pilotage » un menu déroulant (ouverture au clic).
+     * « Organisme » ouvre l'onglet {@link GopView} ; les trois premières
+     * entrées possèdent un sous-menu (contenu à préciser).
+     */
+    private void attacherMenuPilotage(Span cible) {
+        ContextMenu menu = new ContextMenu(cible);
+        menu.setOpenOnClick(true);
+
+        menu.addItem("Projet").getSubMenu().addItem("(à compléter)");
+        menu.addItem("Comité d'évaluation").getSubMenu().addItem("(à compléter)");
+        menu.addItem("Gestion des risques").getSubMenu().addItem("(à compléter)");
+
+        menu.addItem("Lieu");
+        menu.addItem("Organisme", event ->
+                ouvrirOnglet(TITRE_GESTION_UNITES, new GopView()));
+        menu.addItem("Catégorie d'organisme");
+        menu.addItem("Domaine de recherche");
+        menu.addItem("Gestion des défis");
+        menu.addItem("Gestion des axes");
+        menu.addItem("Type de table de domaine");
+        menu.addItem("Secteur d'activité de recherche");
+        menu.addItem("Domaine cru");
+        menu.addItem("Correspondance clarder cru");
+        menu.addItem("Unite domaine");
+        menu.addItem("Conseillers");
+        menu.addItem("Gestion des mots-clés");
+        menu.addItem("Langue");
+        menu.addItem("Pilotage général");
     }
 
     /** Corps de l'accueil : contient le contenu par défaut, puis les onglets. */
