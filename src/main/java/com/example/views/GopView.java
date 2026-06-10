@@ -7,6 +7,7 @@ import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -70,9 +71,20 @@ public class GopView extends Div {
     private final Checkbox comptabilisationFondsInternesCheckbox = new Checkbox();
     private final Checkbox fondsDotationCheckbox = new Checkbox();
 
-    // --- Onglet adresse ---
-    private TextArea adresseSecondaireArea;
+    // --- Onglet adresse principale ---
+    private TextField adressePrincipaleLigne1Field;
+    private TextField adressePrincipaleLigne2Field;
+    private TextField adressePrincipaleLigne3Field;
     private TextField codePostalField;
+
+    // --- Onglet adresse secondaire ---
+    private TextField adresseSecondaireLigne1Field;
+    private TextField adresseSecondaireLigne2Field;
+    private TextField adresseSecondaireLigne3Field;
+    private TextField codePostalSecondaireField;
+
+    // --- Onglet remarque ---
+    private TextArea remarqueArea;
 
     // --- Section bas de formulaire ---
     private TextField categorieCodeField;
@@ -82,6 +94,9 @@ public class GopView extends Div {
     private TextField codeRevenuMeqField;
     private TextField anneeFinActiviteField;
     private TextField moisFermetureField;
+
+    /** Barre d'outils ; son contenu bascule entre mode principal et mode interrogation. */
+    private Div barre;
 
     /** Action de fermeture de l'onglet hôte, injectée par {@link HomeView}. */
     private Runnable fermetureAction;
@@ -114,9 +129,51 @@ public class GopView extends Div {
      * regroupés (fichier / édition / navigation / enregistrements / requête).
      * Chaque bouton porte une info-bulle décrivant sa fonction et son
      * raccourci clavier, lequel déclenche le clic du bouton.
+     *
+     * <p>Le bouton « Interroger » bascule la barre en mode interrogation
+     * ({@link #afficherToolBarInterrogation()}) ; le bouton « Annuler » de ce
+     * mode rétablit la barre principale ({@link #afficherToolBarPrincipale()}).</p>
      */
     private Component creerToolBar() {
-        Div barre = new Div(
+        barre = new Div();
+        barre.addClassName("orpv-toolbar");
+        afficherToolBarPrincipale();
+        return barre;
+    }
+
+    /** Rétablit (ou installe) les boutons de la barre d'outils principale. */
+    private void afficherToolBarPrincipale() {
+        barre.removeAll();
+        barre.add(boutonsPrincipaux());
+        activerLookupCodeOrpv(false);
+    }
+
+    /**
+     * Bascule la barre d'outils en mode interrogation : seuls subsistent les
+     * boutons d'impression et d'édition, complétés des actions propres à
+     * l'interrogation (exécuter, décompter, annuler). Le mode interrogation
+     * active la liste de valeurs sur le code ORPV.
+     */
+    private void afficherToolBarInterrogation() {
+        barre.removeAll();
+        barre.add(boutonsInterrogation());
+        activerLookupCodeOrpv(true);
+    }
+
+    /**
+     * Active ou désactive le bouton « liste de valeurs » du code ORPV. La garde
+     * anti-{@code null} permet d'appeler la méthode pendant la construction de la
+     * barre d'outils, avant que le champ ne soit instancié.
+     */
+    private void activerLookupCodeOrpv(boolean actif) {
+        if (codeOrpvLookupButton != null) {
+            codeOrpvLookupButton.setEnabled(actif);
+        }
+    }
+
+    /** Les 14 boutons de la barre d'outils principale, recréés à chaque appel. */
+    private Component[] boutonsPrincipaux() {
+        return new Component[] {
                 // 1 à 3 — fichier
                 boutonOutilAction("quitter",
                         "Quitter l'application en cours et revenir à la page précédente ou à la page d'accueil (Ctrl+Q)",
@@ -163,11 +220,45 @@ public class GopView extends Div {
                         Key.F6, KeyModifier.SHIFT),
                 separateur(),
                 // 14 — interrogation
-                boutonOutil("interroger",
+                boutonOutilAction("interroger",
                         "Lancer le mode d'interrogation (F7)",
-                        Key.F7));
-        barre.addClassName("orpv-toolbar");
-        return barre;
+                        this::afficherToolBarInterrogation, Key.F7)
+        };
+    }
+
+    /**
+     * Les boutons de la barre d'outils en mode interrogation : impression et
+     * édition (couper / copier / coller / éditer) qui reviennent, puis les
+     * actions propres à l'interrogation (exécuter, décompter, annuler).
+     * Recréés à chaque appel.
+     */
+    private Component[] boutonsInterrogation() {
+        return new Component[] {
+                boutonOutil("imprimer",
+                        "Imprimer la fenêtre courante (Maj+F8)",
+                        Key.F8, KeyModifier.SHIFT),
+                separateur(),
+                boutonOutil("couper",
+                        "Couper le texte sélectionné (Ctrl+X)",
+                        Key.KEY_X, KeyModifier.CONTROL),
+                boutonOutil("copier",
+                        "Copier le texte sélectionné (Ctrl+C)",
+                        Key.KEY_C, KeyModifier.CONTROL),
+                boutonOutil("coller",
+                        "Coller le texte sélectionné (Ctrl+V)",
+                        Key.KEY_V, KeyModifier.CONTROL),
+                boutonOutil("editer",
+                        "Éditer le contenu du champ de la zone de texte où le curseur est positionné (Ctrl+E)",
+                        Key.KEY_E, KeyModifier.CONTROL),
+                separateur(),
+                boutonOutil("executer",
+                        "Exécuter l'interrogation"),
+                boutonOutil("decompter",
+                        "Décompter"),
+                boutonOutilAction("annuler",
+                        "Annuler l'opération",
+                        this::afficherToolBarPrincipale)
+        };
     }
 
     /** Bouton-icône (sans raccourci) : l'icône SVG est servie depuis /icons. */
@@ -194,9 +285,15 @@ public class GopView extends Div {
     /** Bouton-icône avec une action au clic, en plus du raccourci clavier. */
     private Button boutonOutilAction(String icone, String infoBulle, Runnable action,
             Key touche, KeyModifier... modificateurs) {
+        Button bouton = boutonOutilAction(icone, infoBulle, action);
+        bouton.addClickShortcut(touche, modificateurs);
+        return bouton;
+    }
+
+    /** Bouton-icône avec une action au clic (sans raccourci clavier). */
+    private Button boutonOutilAction(String icone, String infoBulle, Runnable action) {
         Button bouton = boutonOutil(icone, infoBulle);
         bouton.addClickListener(event -> action.run());
-        bouton.addClickShortcut(touche, modificateurs);
         return bouton;
     }
 
@@ -243,6 +340,8 @@ public class GopView extends Div {
         codeOrpvField = champTexte("11767");
         codeOrpvField.setWidthFull();
         codeOrpvLookupButton = boutonRecherche();
+        // Désactivé par défaut : seul le mode interrogation l'active.
+        codeOrpvLookupButton.setEnabled(false);
         codeOrpvLookupButton.addClickListener(e -> ouvrirListeValeurs(
                 "Nom de l'organisme", nomField, "Acronyme de l'organisme", acronymeField));
         HorizontalLayout codeOrpvRow = champAvecRecherche(codeOrpvField, codeOrpvLookupButton);
@@ -267,6 +366,7 @@ public class GopView extends Div {
         villeLookupButton.addClickListener(e -> ouvrirListeLieux());
         ajoutLieuButton = new Button("Ajout d'un lieu");
         ajoutLieuButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        ajoutLieuButton.addClickListener(e -> ouvrirGestionLieux());
         HorizontalLayout villeRow = new HorizontalLayout(
                 villeCodeField, villeLookupButton, villeLibelleField, ajoutLieuButton);
         villeRow.setWidthFull();
@@ -297,8 +397,9 @@ public class GopView extends Div {
                 checkboxAvecLibelle("Payeur de frais indirect", payeurFraisIndirectCheckbox),
                 checkboxAvecLibelle("Comptabilisation fonds internes", comptabilisationFondsInternesCheckbox),
                 checkboxAvecLibelle("Fonds de dotation", fondsDotationCheckbox));
+        ligne.addClassName("orpv-options-row");
         ligne.setWidthFull();
-        ligne.setAlignItems(Alignment.CENTER);
+        ligne.setAlignItems(Alignment.BASELINE);
         ligne.setJustifyContentMode(JustifyContentMode.AROUND);
         ligne.getStyle().set("gap", "16px");
         return ligne;
@@ -310,22 +411,52 @@ public class GopView extends Div {
         onglets.setWidthFull();
         onglets.addClassName("orpv-tabs");
 
-        onglets.add("Adresse principale", creerContenuAdresse());
-        onglets.add("Adresse secondaire (0)", contenuVide("Aucune adresse secondaire."));
-        onglets.add("Accréditation", contenuVide("Aucune accréditation."));
-        onglets.add("Remarque", contenuVide("Aucune remarque."));
+        onglets.add("Adresse principale", creerContenuAdressePrincipale());
+        onglets.add("Adresse secondaire (0)", creerContenuAdresseSecondaire());
+        onglets.add("Accréditation", creerContenuAccreditation());
+        onglets.add("Remarque", creerContenuRemarque());
         return onglets;
     }
 
-    /** Contenu de l'onglet d'adresse : zone de texte + code postal. */
-    private FormLayout creerContenuAdresse() {
-        adresseSecondaireArea = new TextArea();
-        adresseSecondaireArea.addThemeVariants(TextAreaVariant.LUMO_SMALL);
-        adresseSecondaireArea.setWidthFull();
-        adresseSecondaireArea.setMinHeight("82px");
-
+    /** Contenu de l'onglet « Adresse principale » : trois lignes d'adresse + code postal. */
+    private FormLayout creerContenuAdressePrincipale() {
+        adressePrincipaleLigne1Field = champTexte("");
+        adressePrincipaleLigne2Field = champTexte("");
+        adressePrincipaleLigne3Field = champTexte("");
         codePostalField = champTexte("");
-        codePostalField.setWidth("16em");
+        return creerFormulaireAdresse("Adresse principale",
+                adressePrincipaleLigne1Field, adressePrincipaleLigne2Field,
+                adressePrincipaleLigne3Field, codePostalField);
+    }
+
+    /** Contenu de l'onglet « Adresse secondaire » : trois lignes d'adresse + code postal. */
+    private FormLayout creerContenuAdresseSecondaire() {
+        adresseSecondaireLigne1Field = champTexte("");
+        adresseSecondaireLigne2Field = champTexte("");
+        adresseSecondaireLigne3Field = champTexte("");
+        codePostalSecondaireField = champTexte("");
+        return creerFormulaireAdresse("Adresse secondaire",
+                adresseSecondaireLigne1Field, adresseSecondaireLigne2Field,
+                adresseSecondaireLigne3Field, codePostalSecondaireField);
+    }
+
+    /**
+     * Construit un formulaire d'adresse : trois lignes de saisie empilées sous
+     * le libellé fourni, suivies du code postal.
+     */
+    private FormLayout creerFormulaireAdresse(String libelleAdresse, TextField ligne1,
+            TextField ligne2, TextField ligne3, TextField codePostal) {
+        ligne1.setWidthFull();
+        ligne2.setWidthFull();
+        ligne3.setWidthFull();
+
+        VerticalLayout lignesAdresse = new VerticalLayout(ligne1, ligne2, ligne3);
+        lignesAdresse.setPadding(false);
+        lignesAdresse.setSpacing(false);
+        lignesAdresse.setWidthFull();
+        lignesAdresse.getStyle().set("gap", "6px");
+
+        codePostal.setWidth("16em");
 
         FormLayout form = new FormLayout();
         form.setWidthFull();
@@ -333,9 +464,202 @@ public class GopView extends Div {
                 new ResponsiveStep("0", 1, LabelsPosition.TOP),
                 new ResponsiveStep("30em", 1, LabelsPosition.ASIDE));
         form.setLabelWidth("110px");
-        form.addFormItem(adresseSecondaireArea, "Adresse secondaire");
-        form.addFormItem(codePostalField, "Code postal");
+        form.addFormItem(lignesAdresse, libelleAdresse);
+        form.addFormItem(codePostal, "Code postal");
         return form;
+    }
+
+    // ------------------------------------------------------------------
+    // Onglet « Accréditation »
+    // ------------------------------------------------------------------
+
+    /**
+     * Contenu de l'onglet « Accréditation » : grille éditable des accréditations.
+     * Chaque ligne couvre une période (début / fin), l'organisme payeur des frais
+     * indirects (saisi ou choisi via le bouton liste) et les dates de création et
+     * de modification (en lecture seule).
+     */
+    private Component creerContenuAccreditation() {
+        Grid<Accreditation> grille = new Grid<>();
+        grille.addClassName("accreditation-grid");
+        grille.setWidthFull();
+        grille.setHeight("150px");
+        grille.setItems(accreditationsSimulees());
+
+        grille.addComponentColumn(acc -> celluleEditable(acc.debut, v -> acc.debut = v))
+                .setHeader("Début").setWidth("90px").setFlexGrow(0);
+        grille.addComponentColumn(acc -> celluleEditable(acc.fin, v -> acc.fin = v))
+                .setHeader("Fin").setWidth("80px").setFlexGrow(0);
+        grille.addComponentColumn(acc -> {
+            Button bouton = boutonRecherche();
+            bouton.addClickListener(e -> ouvrirListeOrganismesPayeurs(acc));
+            return bouton;
+        }).setHeader("").setWidth("56px").setFlexGrow(0);
+        grille.addComponentColumn(acc -> {
+            TextField champ = celluleEditable(acc.organisme, v -> acc.organisme = v);
+            acc.organismeChamp = champ;
+            return champ;
+        }).setHeader("Organisme payeur des frais indirects").setFlexGrow(1);
+        grille.addComponentColumn(acc -> celluleLectureSeule(acc.creation))
+                .setHeader("Création").setWidth("120px").setFlexGrow(0);
+        grille.addComponentColumn(acc -> celluleLectureSeule(acc.modification))
+                .setHeader("Modification").setWidth("120px").setFlexGrow(0);
+        return grille;
+    }
+
+    /** Cellule de grille éditable : un champ texte qui reporte sa valeur dans la ligne. */
+    private TextField celluleEditable(String valeur, Consumer<String> maj) {
+        TextField champ = champTexte(valeur);
+        champ.setWidthFull();
+        champ.addValueChangeListener(e -> maj.accept(e.getValue()));
+        return champ;
+    }
+
+    /** Cellule de grille en lecture seule (dates de création / modification). */
+    private TextField celluleLectureSeule(String valeur) {
+        TextField champ = champTexte(valeur);
+        champ.setWidthFull();
+        champ.setReadOnly(true);
+        return champ;
+    }
+
+    /**
+     * Liste temporaire d'accréditations, simulant le résultat d'une requête en
+     * base : une ligne renseignée suivie de lignes vierges prêtes à la saisie.
+     * À remplacer ultérieurement par les données réelles.
+     */
+    private List<Accreditation> accreditationsSimulees() {
+        return List.of(
+                new Accreditation("", "3999", "", "2026-06-10", "2026-06-10"),
+                new Accreditation("", "", "", "", ""),
+                new Accreditation("", "", "", "", ""),
+                new Accreditation("", "", "", "", ""));
+    }
+
+    /**
+     * Ouvre la fenêtre modale « Liste des organismes payeurs des frais indirects ».
+     * À la validation — bouton « OK » ou double-clic — le nom de l'organisme
+     * sélectionné est reporté dans le champ « Organisme » de la ligne courante.
+     */
+    private void ouvrirListeOrganismesPayeurs(Accreditation acc) {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Liste des organismes payeurs des frais indirects");
+        dialog.setDraggable(true);
+        dialog.setResizable(true);
+        dialog.addClassName("lieux-dialog");
+        dialog.setWidth("620px");
+        dialog.setHeight("520px");
+
+        TextField rechField = new TextField();
+        rechField.setValue("%");
+        rechField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        rechField.setWidthFull();
+        Span rechLabel = new Span("Rech.");
+        rechLabel.addClassName("lieux-rech-label");
+        HorizontalLayout barreRecherche = new HorizontalLayout(rechLabel, rechField);
+        barreRecherche.setWidthFull();
+        barreRecherche.setAlignItems(Alignment.CENTER);
+        barreRecherche.setFlexGrow(1, rechField);
+
+        Grid<String> grille = new Grid<>();
+        grille.addClassName("lieux-grid");
+        grille.setSizeFull();
+        grille.setSelectionMode(Grid.SelectionMode.SINGLE);
+        grille.addColumn(nom -> nom).setHeader("Organisme payeur des frais indirects")
+                .setFlexGrow(1).setResizable(true);
+
+        List<String> tousLesOrganismes = organismesPayeursSimules();
+        appliquerResultats(grille, tousLesOrganismes);
+
+        VerticalLayout contenu = new VerticalLayout(barreRecherche, grille);
+        contenu.setPadding(false);
+        contenu.setSpacing(true);
+        contenu.setSizeFull();
+        contenu.setFlexGrow(1, grille);
+        dialog.add(contenu);
+
+        Runnable rechercher = () -> {
+            String motif = rechField.getValue();
+            List<String> resultats = tousLesOrganismes.stream()
+                    .filter(nom -> correspondMotif(nom, motif))
+                    .toList();
+            appliquerResultats(grille, resultats);
+        };
+        rechField.addKeyDownListener(Key.ENTER, e -> rechercher.run());
+
+        Consumer<String> valider = nom -> {
+            if (nom != null && acc.organismeChamp != null) {
+                acc.organismeChamp.setValue(nom);
+            }
+            dialog.close();
+        };
+        grille.addItemDoubleClickListener(e -> valider.accept(e.getItem()));
+
+        Button rechButton = new Button("Rech.", e -> rechercher.run());
+        rechButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+
+        Button okButton = new Button("OK",
+                e -> valider.accept(grille.asSingleSelect().getValue()));
+        okButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+        okButton.addClassName("orpv-dialog-ok");
+
+        Button annulerButton = new Button("Annuler", e -> dialog.close());
+        annulerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        annulerButton.addClickShortcut(Key.ESCAPE);
+
+        dialog.getFooter().add(rechButton, okButton, annulerButton);
+        dialog.open();
+    }
+
+    /**
+     * Liste temporaire d'organismes payeurs, simulant le résultat d'une requête
+     * en base. À remplacer ultérieurement par les données réelles.
+     */
+    private List<String> organismesPayeursSimules() {
+        return List.of(
+                "A E I Technologies Inc.",
+                "Conseil de recherches en sciences naturelles et en génie",
+                "Fondation canadienne pour l'innovation",
+                "Fonds de recherche du Québec",
+                "Instituts de recherche en santé du Canada",
+                "Ministère de l'Économie et de l'Innovation",
+                "Université Laval");
+    }
+
+    /** Ligne d'accréditation éditable présentée dans l'onglet « Accréditation ». */
+    private static final class Accreditation {
+        private String debut;
+        private String fin;
+        private String organisme;
+        private final String creation;
+        private final String modification;
+        /** Champ « Organisme » de la ligne, pour report depuis la liste de valeurs. */
+        private TextField organismeChamp;
+
+        Accreditation(String debut, String fin, String organisme,
+                String creation, String modification) {
+            this.debut = debut;
+            this.fin = fin;
+            this.organisme = organisme;
+            this.creation = creation;
+            this.modification = modification;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Onglet « Remarque »
+    // ------------------------------------------------------------------
+
+    /**
+     * Contenu de l'onglet « Remarque » : une grande zone de texte libre occupant
+     * toute la largeur, défilante lorsque le texte dépasse sa hauteur.
+     */
+    private Component creerContenuRemarque() {
+        remarqueArea = new TextArea();
+        remarqueArea.addThemeVariants(TextAreaVariant.LUMO_SMALL);
+        remarqueArea.setWidthFull();
+        remarqueArea.setHeight("150px");
+        return remarqueArea;
     }
 
     /** Bloc inférieur : catégorie, site web, revenus. */
@@ -424,6 +748,7 @@ public class GopView extends Div {
             dialog.close();
         });
         okButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+        okButton.addClassName("orpv-dialog-ok");
         okButton.addClickShortcut(Key.ENTER);
 
         Button annulerButton = new Button("Annuler", e -> dialog.close());
@@ -432,6 +757,137 @@ public class GopView extends Div {
 
         dialog.getFooter().add(okButton, annulerButton);
         dialog.open();
+    }
+
+    // ------------------------------------------------------------------
+    // Gestion des lieux (fenêtre « Ajout d'un lieu »)
+    // ------------------------------------------------------------------
+
+    /**
+     * Ouvre la fenêtre modale « Système de la recherche - Gestion des lieux » :
+     * formulaire de saisie d'un lieu (code, nom, nom abrégé, type de lieu, pays
+     * attaché et code de lieu précédent). Le type de lieu est choisi dans une
+     * liste déroulante. La fenêtre est déplaçable, redimensionnable et se ferme
+     * via la croix de son en-tête.
+     */
+    private void ouvrirGestionLieux() {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Système de la recherche - Gestion des lieux");
+        dialog.setDraggable(true);
+        dialog.setResizable(true);
+        dialog.addClassName("gestion-lieux-dialog");
+        dialog.setWidth("760px");
+        dialog.setHeight("520px");
+
+        Button fermer = new Button(VaadinIcon.CLOSE_SMALL.create(), e -> dialog.close());
+        fermer.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL,
+                ButtonVariant.LUMO_ICON);
+        fermer.setAriaLabel("Fermer");
+        dialog.getHeader().add(fermer);
+
+        Span titre = new Span("Gestion des lieux");
+        titre.addClassName("gestion-lieux-titre");
+
+        // Code de lieu : champ court + bouton liste de valeurs.
+        TextField codeLieuField = champTexte("");
+        codeLieuField.setWidth("80px");
+        HorizontalLayout codeLieuGroupe = groupeChamps(codeLieuField, boutonRecherche());
+
+        // Nom : champ pleine largeur.
+        TextField nomLieuField = champTexte("");
+        nomLieuField.setWidthFull();
+
+        // Nom abrégé.
+        TextField nomAbregeField = champTexte("");
+        nomAbregeField.setWidth("20em");
+
+        // Type de lieu : liste déroulante.
+        ComboBox<String> typeLieuCombo = new ComboBox<>();
+        typeLieuCombo.setItems("  ", "Bonjour", "Bonsoir", "Samedi");
+        typeLieuCombo.setWidth("20em");
+
+        // Pays attaché : code + bouton + libellé (renseigné par la liste, en lecture seule).
+        TextField paysCodeField = champTexte("");
+        paysCodeField.setWidth("60px");
+        TextField paysLibelleField = champTexte("");
+        paysLibelleField.setWidthFull();
+        paysLibelleField.setEnabled(false);
+        HorizontalLayout paysGroupe =
+                groupeChamps(paysCodeField, boutonRecherche(), paysLibelleField);
+        paysGroupe.setWidthFull();
+        paysGroupe.setFlexGrow(1, paysLibelleField);
+
+        VerticalLayout formulaire = new VerticalLayout(
+                ligneFormulaire("Code de lieu :", codeLieuGroupe, false),
+                ligneFormulaire("Nom :", nomLieuField, true),
+                ligneFormulaire("Nom abrégé :", nomAbregeField, false),
+                ligneFormulaire("Type de lieu :", typeLieuCombo, false),
+                ligneFormulaire("Pays attaché :", paysGroupe, true));
+        formulaire.setPadding(false);
+        formulaire.setSpacing(false);
+        formulaire.setWidthFull();
+        formulaire.getStyle().set("gap", "8px");
+
+        // Code de lieu précédent : ligne autonome, libellé plus large que les autres.
+        TextField precCodeField = champTexte("");
+        precCodeField.setWidth("60px");
+        TextField precCodeLibelleField = champTexte("");
+        precCodeLibelleField.setWidth("90px");
+        precCodeLibelleField.setEnabled(false);
+        TextField precNomField = champTexte("");
+        precNomField.setWidthFull();
+        precNomField.setEnabled(false);
+        Span precLabel = new Span("Code de lieu précédent :");
+        precLabel.addClassName("gestion-lieux-label");
+        HorizontalLayout precGroupe = groupeChamps(precCodeField, boutonRecherche(),
+                precCodeLibelleField, precNomField);
+        precGroupe.setWidthFull();
+        precGroupe.setFlexGrow(1, precNomField);
+        HorizontalLayout precRow = new HorizontalLayout(precLabel, precGroupe);
+        precRow.setWidthFull();
+        precRow.setAlignItems(Alignment.CENTER);
+        precRow.setSpacing(false);
+        precRow.getStyle().set("gap", "8px");
+        precRow.setFlexGrow(1, precGroupe);
+        precRow.addClassName("gestion-lieux-prec-row");
+
+        VerticalLayout contenu = new VerticalLayout(titre, formulaire, precRow);
+        contenu.setPadding(true);
+        contenu.setSpacing(true);
+        contenu.setWidthFull();
+        dialog.add(contenu);
+        dialog.open();
+    }
+
+    /**
+     * Ligne « libellé : contenu » de la fenêtre Gestion des lieux. Le libellé
+     * occupe une colonne fixe pour aligner les champs ; {@code etirer} indique si
+     * le contenu doit occuper toute la largeur restante.
+     */
+    private HorizontalLayout ligneFormulaire(String libelle, Component contenu, boolean etirer) {
+        Span label = new Span(libelle);
+        label.addClassName("gestion-lieux-label");
+        label.setWidth("120px");
+        label.setMinWidth("120px");
+        HorizontalLayout ligne = new HorizontalLayout(label, contenu);
+        ligne.setWidthFull();
+        ligne.setAlignItems(Alignment.CENTER);
+        ligne.setSpacing(false);
+        ligne.getStyle().set("gap", "8px");
+        if (etirer) {
+            ligne.setFlexGrow(1, contenu);
+        }
+        return ligne;
+    }
+
+    /** Groupe horizontal compact de composants (champ + bouton + libellé côte à côte). */
+    private HorizontalLayout groupeChamps(Component... composants) {
+        HorizontalLayout groupe = new HorizontalLayout(composants);
+        groupe.setPadding(false);
+        groupe.setSpacing(false);
+        groupe.setAlignItems(Alignment.CENTER);
+        groupe.getStyle().set("gap", "5px");
+        return groupe;
     }
 
     // ------------------------------------------------------------------
@@ -523,6 +979,7 @@ public class GopView extends Div {
         Button okButton = new Button("OK",
                 e -> valider.accept(grille.asSingleSelect().getValue()));
         okButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+        okButton.addClassName("orpv-dialog-ok");
 
         Button annulerButton = new Button("Annuler", e -> dialog.close());
         annulerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
@@ -682,6 +1139,7 @@ public class GopView extends Div {
         Button okButton = new Button("OK",
                 e -> valider.accept(grille.asSingleSelect().getValue()));
         okButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+        okButton.addClassName("orpv-dialog-ok");
 
         Button annulerButton = new Button("Annuler", e -> dialog.close());
         annulerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
@@ -771,13 +1229,5 @@ public class GopView extends Div {
         ligne.setSpacing(false);
         ligne.getStyle().set("gap", "6px");
         return ligne;
-    }
-
-    private Component contenuVide(String message) {
-        Span span = new Span(message);
-        span.addClassName("orpv-empty-tab");
-        Div conteneur = new Div(span);
-        conteneur.setWidthFull();
-        return conteneur;
     }
 }

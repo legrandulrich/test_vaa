@@ -331,6 +331,12 @@
     --lumo-primary-text-color: #ffffff;
 }
 
+/* Bouton « OK » des fenêtres modales (listes de valeurs) : fond vert. */
+.orpv-dialog-ok {
+    --lumo-primary-color: var(--orpv-success);
+    --lumo-primary-text-color: #ffffff;
+}
+
 
 /* ====================================================================
    7. GOP VIEW
@@ -358,6 +364,12 @@
 .orpv-body > *:not(:last-child) {
     margin-bottom: 14px;
     display: block;
+}
+
+/* Ligne des trois options à cocher : rétablir le flex horizontal écrasé par
+   la règle display:block ci-dessus (même spécificité, déclarée après). */
+.orpv-body .orpv-options-row {
+    display: flex;
 }
 
 /* --- Barre d'outils : 14 boutons-icônes façon application bureautique --- */
@@ -542,4 +554,69 @@
 .lieux-grid::part(cell) {
     padding-top: 2px;
     padding-bottom: 2px;
+}
+
+
+/* ====================================================================
+   10. ONGLET ACCRÉDITATION
+   Grille éditable de l'onglet « Accréditation » : en-têtes gris, cellules
+   denses contenant des champs de saisie.
+   ==================================================================== */
+.accreditation-grid {
+    font-size: 13px;
+    border: 1px solid var(--orpv-field-border);
+}
+
+.accreditation-grid::part(header-cell) {
+    background: var(--orpv-statusbar-bg);
+    font-weight: 600;
+}
+
+/* Cellules denses : les champs de saisie occupent toute la cellule. */
+.accreditation-grid::part(cell) {
+    padding: 1px 3px;
+}
+
+
+/* ====================================================================
+   11. GESTION DES LIEUX (fenêtre « Ajout d'un lieu »)
+   Fenêtre modale de saisie d'un lieu : densité compacte, titre de section
+   en gras et libellés alignés à gauche des champs.
+   ==================================================================== */
+
+/* Densité compacte (l'overlay du Dialog n'hérite pas des variables de .orpv-body). */
+.gestion-lieux-dialog {
+    --lumo-font-size-m: 13px;
+    --lumo-font-size-s: 12px;
+    --lumo-size-m: 1.9rem;
+    --lumo-border-radius-m: 3px;
+    --lumo-border-radius-s: 2px;
+    --vaadin-input-field-border-width: 1px;
+    --vaadin-input-field-border-color: var(--orpv-field-border);
+    --vaadin-input-field-background: #ffffff;
+}
+
+.gestion-lieux-dialog::part(content) {
+    padding: 8px 16px 16px;
+}
+
+/* Titre de section « Gestion des lieux » en haut du formulaire. */
+.gestion-lieux-titre {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--orpv-text);
+    margin-bottom: 4px;
+}
+
+/* Libellés des champs (alignés à gauche, sans retour à la ligne). */
+.gestion-lieux-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--orpv-text);
+    white-space: nowrap;
+}
+
+/* Ligne « Code de lieu précédent » : un peu détachée du bloc supérieur. */
+.gestion-lieux-prec-row {
+    margin-top: 10px;
 }

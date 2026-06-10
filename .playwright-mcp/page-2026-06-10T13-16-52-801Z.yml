@@ -1,0 +1,489 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - button "Quitter l'application en cours et revenir à la page précédente ou à la page d'accueil (Ctrl+Q)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Quitter l'application en cours et revenir à la page précédente ou à la page d'accueil (Ctrl+Q)"
+                - button "Enregistrer les changements effectués à une entente de financement (F10)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Enregistrer les changements effectués à une entente de financement (F10)"
+                - button "Imprimer la fenêtre courante (Maj+F8)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Imprimer la fenêtre courante (Maj+F8)"
+                - button "Couper le texte sélectionné (Ctrl+X)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Couper le texte sélectionné (Ctrl+X)"
+                - button "Copier le texte sélectionné (Ctrl+C)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Copier le texte sélectionné (Ctrl+C)"
+                - button "Coller le texte sélectionné (Ctrl+V)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Coller le texte sélectionné (Ctrl+V)"
+                - button "Éditer le contenu du champ de la zone de texte où le curseur est positionné (Ctrl+E)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Éditer le contenu du champ de la zone de texte où le curseur est positionné (Ctrl+E)"
+                - button "Aller au premier enregistrement":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Aller au premier enregistrement"
+                - button "Aller à l'enregistrement précédent (Flèche haut)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Aller à l'enregistrement précédent (Flèche haut)"
+                - button "Aller à l'enregistrement suivant (Flèche bas)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Aller à l'enregistrement suivant (Flèche bas)"
+                - button "Aller au dernier enregistrement":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Aller au dernier enregistrement"
+                - button "Créer un nouvel enregistrement (F6)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Créer un nouvel enregistrement (F6)"
+                - button "Détruire ou effacer l'enregistrement courant identifié par le curseur (Maj+F6)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Détruire ou effacer l'enregistrement courant identifié par le curseur (Maj+F6)"
+                - button "Lancer le mode d'interrogation (F7)":
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Lancer le mode d'interrogation (F7)"
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Code ORPV
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - text: "*"
+                                  - generic:
+                                    - generic:
+                                      - generic:
+                                        - textbox: "11767"
+                              - button:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic:
+                                        - img
+                    - generic:
+                      - generic:
+                        - generic: SIRU
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - text: "*"
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - textbox "SIRU": "14531"
+                    - generic:
+                      - generic:
+                        - generic: MESS
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - text: "*"
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - textbox "MESS": "14531"
+                    - generic:
+                      - generic:
+                        - generic: Acronyme
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - text: "*"
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - textbox "Acronyme": AEI
+                    - generic:
+                      - generic:
+                        - generic: Nom
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - text: "*"
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - textbox "Nom": A E I Technologies Inc.
+                    - generic:
+                      - generic:
+                        - generic: Autre nom
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - text: "*"
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - textbox "Autre nom"
+                    - generic:
+                      - generic:
+                        - generic: Ville
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - text: "*"
+                                  - generic:
+                                    - generic:
+                                      - generic:
+                                        - textbox: PIT
+                              - button:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic:
+                                        - img
+                              - generic:
+                                - generic:
+                                  - text: "*"
+                                  - generic:
+                                    - generic:
+                                      - generic:
+                                        - textbox: Pittsburgh Pennsylvania, États-Unis
+                              - button "Ajout d'un lieu":
+                                - generic:
+                                  - generic:
+                                    - generic: Ajout d'un lieu
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: Payeur de frais indirect
+                      - generic:
+                        - generic:
+                          - generic:
+                            - checkbox
+                          - text: "*"
+                  - generic:
+                    - generic:
+                      - generic: Comptabilisation fonds internes
+                      - generic:
+                        - generic:
+                          - generic:
+                            - checkbox
+                          - text: "*"
+                  - generic:
+                    - generic:
+                      - generic: Fonds de dotation
+                      - generic:
+                        - generic:
+                          - generic:
+                            - checkbox
+                          - text: "*"
+              - generic:
+                - generic:
+                  - generic:
+                    - tablist:
+                      - generic:
+                        - generic:
+                          - tab "Adresse principale" [selected]:
+                            - generic: Adresse principale
+                          - tab "Adresse secondaire (0)":
+                            - generic: Adresse secondaire (0)
+                          - tab "Accréditation":
+                            - generic: Accréditation
+                          - tab "Remarque":
+                            - generic: Remarque
+                - generic:
+                  - generic:
+                    - generic:
+                      - tabpanel "Adresse principale":
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic: Adresse secondaire
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - text: "*"
+                                      - generic:
+                                        - generic:
+                                          - generic:
+                                            - textbox "Adresse secondaire"
+                            - generic:
+                              - generic:
+                                - generic: Code postal
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - text: "*"
+                                      - generic:
+                                        - generic:
+                                          - generic:
+                                            - textbox "Code postal"
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Catégorie
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - text: "*"
+                                  - generic:
+                                    - generic:
+                                      - generic:
+                                        - textbox: "61"
+                              - button:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic:
+                                        - img
+                              - generic:
+                                - generic:
+                                  - text: "*"
+                                  - generic:
+                                    - generic:
+                                      - generic:
+                                        - textbox: "Non canadien: compagnies"
+                    - generic:
+                      - generic:
+                        - generic: Site WWW
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - text: "*"
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - textbox "Site WWW": http://www.aeitecno.com/
+                    - generic:
+                      - generic:
+                        - generic: Code revenu MEQ
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - text: "*"
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - textbox "Code revenu MEQ": "430"
+                    - generic:
+                      - generic:
+                        - generic: Année fin activité
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - text: "*"
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - textbox "Année fin activité"
+                    - generic:
+                      - generic:
+                        - generic: Mois fermeture
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - text: "*"
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - textbox "Mois fermeture": "03"
+          - generic:
+            - generic: Gestion des organismes pourvoyeurs | Prêt
+            - generic: 09:16
+  - generic:
+    - generic [ref=e263]:
+      - radiogroup "Mode" [ref=e265]:
+        - generic [ref=e266]:
+          - text: "*"
+          - generic [ref=e267]:
+            - generic:
+              - generic [ref=e268]:
+                - generic:
+                  - radio [ref=e269] [cursor=pointer]
+                  - img [ref=e272] [cursor=pointer]:
+                    - img [ref=e274]
+              - generic [ref=e276]:
+                - generic:
+                  - radio [ref=e277] [cursor=pointer]
+                  - img [ref=e280] [cursor=pointer]:
+                    - img [ref=e282]
+              - generic [ref=e284]:
+                - generic:
+                  - radio [ref=e285] [cursor=pointer]
+                  - img [ref=e288] [cursor=pointer]:
+                    - img [ref=e290]
+              - generic [ref=e292]:
+                - generic:
+                  - radio [checked] [ref=e293] [cursor=pointer]
+                  - generic [ref=e295] [cursor=pointer]:
+                    - img [ref=e297]:
+                      - img [ref=e299]
+                    - img [ref=e302]:
+                      - img [ref=e304]
+      - button "DevTools" [ref=e307] [cursor=pointer]:
+        - img [ref=e311]:
+          - img [ref=e313]
+    - region "Notifications" [ref=e316]:
+      - generic [ref=e318]:
+        - img [ref=e320]:
+          - img [ref=e322]
+        - generic [ref=e324]:
+          - heading "App is running in development mode" [level=2] [ref=e325]
+          - separator [ref=e326]
+          - generic [ref=e328]:
+            - checkbox "Don't show again" [ref=e330] [cursor=pointer]
+            - generic [ref=e331] [cursor=pointer]:
+              - generic: Don't show again
+              - text: "*"
+        - button "Close" [ref=e332] [cursor=pointer]:
+          - img [ref=e336]:
+            - img [ref=e338]
+  - generic:
+    - generic:
+      - generic: Online
+  - dialog "Liste des catégories d'organismes pourvoyeurs" [active]:
+    - generic [ref=e343]:
+      - heading "Liste des catégories d'organismes pourvoyeurs" [level=2] [ref=e344]
+      - generic [ref=e347]:
+        - generic:
+          - generic [ref=e348]:
+            - generic:
+              - generic [ref=e349]: Rech.
+              - generic [ref=e351]:
+                - text: "*"
+                - textbox [ref=e353]: "%"
+          - treegrid [ref=e356]:
+            - rowgroup [ref=e357]:
+              - row "Description Catégorie" [ref=e358]:
+                - columnheader "Description" [ref=e359]:
+                  - generic [ref=e360]: Description
+                - columnheader "Catégorie" [ref=e362]:
+                  - generic [ref=e363]: Catégorie
+            - rowgroup [ref=e365]:
+              - row "Compagnies 11" [selected] [ref=e366]:
+                - gridcell "Compagnies" [selected] [ref=e367]:
+                  - generic [ref=e368]: Compagnies
+                - gridcell "11" [selected] [ref=e369]:
+                  - generic [ref=e370]: "11"
+              - row "Divers 40" [ref=e371]:
+                - gridcell "Divers" [ref=e372]:
+                  - generic [ref=e373]: Divers
+                - gridcell "40" [ref=e374]:
+                  - generic [ref=e375]: "40"
+              - row "Établissements de santé 33" [ref=e376]:
+                - gridcell "Établissements de santé" [ref=e377]:
+                  - generic [ref=e378]: Établissements de santé
+                - gridcell "33" [ref=e379]:
+                  - generic [ref=e380]: "33"
+              - row "Établissements d'enseignement 31" [ref=e381]:
+                - gridcell "Établissements d'enseignement" [ref=e382]:
+                  - generic [ref=e383]: Établissements d'enseignement
+                - gridcell "31" [ref=e384]:
+                  - generic [ref=e385]: "31"
+              - row "Fondations, assoc., sociétés 12" [ref=e386]:
+                - gridcell "Fondations, assoc., sociétés" [ref=e387]:
+                  - generic [ref=e388]: Fondations, assoc., sociétés
+                - gridcell "12" [ref=e389]:
+                  - generic [ref=e390]: "12"
+              - row "Gouvernement du Canada 21" [ref=e391]:
+                - gridcell "Gouvernement du Canada" [ref=e392]:
+                  - generic [ref=e393]: Gouvernement du Canada
+                - gridcell "21" [ref=e394]:
+                  - generic [ref=e395]: "21"
+              - row "Gouvernement du Québec 23" [ref=e396]:
+                - gridcell "Gouvernement du Québec" [ref=e397]:
+                  - generic [ref=e398]: Gouvernement du Québec
+                - gridcell "23" [ref=e399]:
+                  - generic [ref=e400]: "23"
+              - row "Gouvernements autres provinces 25" [ref=e401]:
+                - gridcell "Gouvernements autres provinces" [ref=e402]:
+                  - generic [ref=e403]: Gouvernements autres provinces
+                - gridcell "25" [ref=e404]:
+                  - generic [ref=e405]: "25"
+              - row "Indéterminé 0" [ref=e406]:
+                - gridcell "Indéterminé" [ref=e407]:
+                  - generic [ref=e408]: Indéterminé
+                - gridcell "0" [ref=e409]:
+                  - generic [ref=e410]: "0"
+              - row "Municipalités 22" [ref=e411]:
+                - gridcell "Municipalités" [ref=e412]:
+                  - generic [ref=e413]: Municipalités
+                - gridcell "22" [ref=e414]:
+                  - generic [ref=e415]: "22"
+              - 'row "Non canadien: compagnies 61" [ref=e416]':
+                - 'gridcell "Non canadien: compagnies" [ref=e417]':
+                  - generic [ref=e418]: "Non canadien: compagnies"
+                - gridcell "61" [ref=e419]:
+                  - generic [ref=e420]: "61"
+              - 'row "Non canadien: divers 90" [ref=e421]':
+                - 'gridcell "Non canadien: divers" [ref=e422]':
+                  - generic [ref=e423]: "Non canadien: divers"
+                - gridcell "90" [ref=e424]:
+                  - generic [ref=e425]: "90"
+              - 'row "Non canadien: établiss. ens. 81" [ref=e426]':
+                - 'gridcell "Non canadien: établiss. ens." [ref=e427]':
+                  - generic [ref=e428]: "Non canadien: établiss. ens."
+                - gridcell "81" [ref=e429]:
+                  - generic [ref=e430]: "81"
+            - rowgroup
+      - generic [ref=e432]:
+        - button "Rech." [ref=e433] [cursor=pointer]:
+          - generic [ref=e435]:
+            - generic: Rech.
+        - button "OK" [ref=e436] [cursor=pointer]:
+          - generic [ref=e438]:
+            - generic: OK
+        - button "Annuler" [ref=e439] [cursor=pointer]:
+          - generic [ref=e441]:
+            - generic: Annuler
