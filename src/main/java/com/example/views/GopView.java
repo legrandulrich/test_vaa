@@ -363,6 +363,8 @@ public class GopView extends Div {
         villeLookupButton = boutonRecherche();
         villeLibelleField = champTexte("Pittsburgh  Pennsylvania, États-Unis");
         villeLibelleField.setWidthFull();
+        // Libellé de la ville : renseigné par la liste des lieux, non éditable au clavier.
+        villeLibelleField.setReadOnly(true);
         villeLookupButton.addClickListener(e -> ouvrirListeLieux());
         ajoutLieuButton = new Button("Ajout d'un lieu");
         ajoutLieuButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
