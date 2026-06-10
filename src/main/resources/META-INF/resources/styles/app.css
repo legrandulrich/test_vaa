@@ -12,7 +12,7 @@
      4. MainLayout (contenu + barre d'état)           .app-content / .app-statusbar*
      5. Barre de menu + onglets fermables (HomeView)  .orpv-menubar / .orpv-menu-item / .orpv-main-* / .orpv-tab-*
      6. AcceuilView (écran d'accueil « splash »)      .acceuil-*
-     7. GopView (corps de formulaire)                 .orpv-body / champs / onglets internes
+     7. Tcmgorg1MainView (corps de formulaire)        .orpv-body / champs / onglets internes
    ==================================================================== */
 
 
@@ -339,7 +339,7 @@
 
 
 /* ====================================================================
-   7. GOP VIEW
+   7. TCMGORG1MAINVIEW
    Corps du formulaire « Gestion des organismes pourvoyeurs » : sections
    de saisie seules (ni fenêtre ni barre de titre), compact et
    responsive. Réutilisé tel quel par HomeView dans un onglet.

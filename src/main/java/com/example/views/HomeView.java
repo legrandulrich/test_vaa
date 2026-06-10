@@ -30,7 +30,7 @@ import java.util.Map;
  * Écran d'accueil de l'application (SIRUL). Première vue affichée.
  *
  * <ul>
- *   <li>« Gestion des unités » → ouvre {@link GopView} dans un onglet
+ *   <li>« Gestion des unités » → ouvre {@link Tcmgorg1MainView} dans un onglet
  *       fermable du corps. Tant qu'aucun onglet n'est ouvert, le corps
  *       affiche le contenu d'accueil (titre SIRUL et bouton « Quitter »).
  *       Un onglet déjà ouvert n'est jamais dupliqué : il est réactivé.</li>
@@ -76,7 +76,7 @@ public class HomeView extends Div {
     private Div creerBarreMenu() {
         Span gestionUnitesItem = elementMenu("Gestion des unités");
         gestionUnitesItem.addClickListener(event ->
-                ouvrirOnglet(TITRE_GESTION_UNITES, new GopView()));
+                ouvrirOnglet(TITRE_GESTION_UNITES, new Tcmgorg1MainView()));
 
         Span pilotageItem = elementMenu("Pilotage");
         attacherMenuPilotage(pilotageItem);
@@ -96,7 +96,7 @@ public class HomeView extends Div {
 
     /**
      * Attache à l'élément « Pilotage » un menu déroulant (ouverture au clic).
-     * « Organisme » ouvre l'onglet {@link GopView} ; les trois premières
+     * « Organisme » ouvre l'onglet {@link Tcmgorg1MainView} ; les trois premières
      * entrées possèdent un sous-menu (contenu à préciser).
      */
     private void attacherMenuPilotage(Span cible) {
@@ -109,7 +109,7 @@ public class HomeView extends Div {
 
         menu.addItem("Lieu");
         menu.addItem("Organisme", event ->
-                ouvrirOnglet(TITRE_GESTION_UNITES, new GopView()));
+                ouvrirOnglet(TITRE_GESTION_UNITES, new Tcmgorg1MainView()));
         menu.addItem("Catégorie d'organisme");
         menu.addItem("Domaine de recherche");
         menu.addItem("Gestion des défis");
@@ -204,7 +204,7 @@ public class HomeView extends Div {
             mettreAJourAffichage();
         };
         boutonFermer.addClickListener(event -> fermerOnglet.run());
-        if (contenu instanceof GopView gopView) {
+        if (contenu instanceof Tcmgorg1MainView gopView) {
             gopView.setFermetureAction(fermerOnglet);
         }
 

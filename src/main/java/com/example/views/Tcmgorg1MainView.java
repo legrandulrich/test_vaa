@@ -51,7 +51,7 @@ import java.util.regex.Pattern;
 @StyleSheet("styles/app.css")
 @SpringComponent
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class GopView extends Div {
+public class Tcmgorg1MainView extends Div {
 
     // --- Section identification ---
     private TextField codeOrpvField;
@@ -101,7 +101,7 @@ public class GopView extends Div {
     /** Action de fermeture de l'onglet hôte, injectée par {@link HomeView}. */
     private Runnable fermetureAction;
 
-    public GopView() {
+    public Tcmgorg1MainView() {
         // HomeView est constitué uniquement du corps du formulaire :
         // on ajoute directement les sections de saisie, sans fenêtre ni titre.
         addClassName("orpv-body");
