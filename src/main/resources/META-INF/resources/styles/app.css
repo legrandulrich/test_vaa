@@ -422,9 +422,16 @@
     cursor: pointer;
 }
 
+/* Libellés des champs (vaadin-form-item) : un peu plus grands et en gras. */
+.orpv-body vaadin-form-item::part(label) {
+    font-size: 14px;
+    font-weight: 600;
+}
+
 /* Libellés des cases à cocher (à gauche de la case) */
 .orpv-checkbox-label {
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 600;
     color: var(--orpv-text);
 }
 
@@ -497,4 +504,42 @@
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
+}
+
+
+/* ====================================================================
+   9. LISTE DES LIEUX
+   Fenêtre modale de sélection d'un lieu (déclenchée par le bouton loupe
+   à côté du code ville) : champ de recherche en haut, grille des lieux,
+   boutons Rech. / OK / Annuler en pied.
+   ==================================================================== */
+
+/* Contenu compact, sans la marge généreuse par défaut du Dialog. */
+.lieux-dialog::part(content) {
+    padding: 8px 12px 4px;
+}
+
+/* Libellé « Rech » à gauche du champ de recherche. */
+.lieux-rech-label {
+    font-weight: 600;
+    color: var(--orpv-text);
+}
+
+/* Grille des lieux : lignes denses, encadrée, sélection bien lisible. */
+.lieux-grid {
+    font-size: 13px;
+    border: 1px solid var(--orpv-field-border);
+
+    /* Renforce le bleu de la ligne sélectionnée (façon liste d'origine). */
+    --lumo-primary-color-10pct: rgba(43, 66, 116, 0.28);
+}
+
+.lieux-grid::part(header-cell) {
+    background: var(--orpv-statusbar-bg);
+    font-weight: 600;
+}
+
+.lieux-grid::part(cell) {
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
