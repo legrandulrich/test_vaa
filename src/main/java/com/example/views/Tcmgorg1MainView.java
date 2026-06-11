@@ -253,9 +253,9 @@ public class Tcmgorg1MainView extends Div {
                 boutonOutil("enregistrer",
                         "Enregistrer les changements effectués à une entente de financement (F10)",
                         Key.F10),
-                boutonOutil("imprimer",
+                boutonOutilAction("imprimer",
                         "Imprimer la fenêtre courante (Maj+F8)",
-                        Key.F8, KeyModifier.SHIFT),
+                        this::imprimer, Key.F8, KeyModifier.SHIFT),
                 separateur(),
                 // 4 à 7 — édition
                 boutonOutil("couper",
@@ -308,9 +308,9 @@ public class Tcmgorg1MainView extends Div {
      */
     private Component[] boutonsInterrogation() {
         return new Component[] {
-                boutonOutil("imprimer",
+                boutonOutilAction("imprimer",
                         "Imprimer la fenêtre courante (Maj+F8)",
-                        Key.F8, KeyModifier.SHIFT),
+                        this::imprimer, Key.F8, KeyModifier.SHIFT),
                 separateur(),
                 boutonOutil("couper",
                         "Couper le texte sélectionné (Ctrl+X)",
@@ -415,6 +415,14 @@ public class Tcmgorg1MainView extends Div {
         } else {
             getUI().ifPresent(ui -> ui.navigate(AcceuilView.class));
         }
+    }
+
+    /**
+     * « Imprimer » : déclenche la boîte de dialogue d'impression du navigateur
+     * pour la fenêtre courante.
+     */
+    private void imprimer() {
+        getUI().ifPresent(ui -> ui.getPage().executeJs("window.print()"));
     }
 
     // ------------------------------------------------------------------

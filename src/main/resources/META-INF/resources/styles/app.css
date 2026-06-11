@@ -620,3 +620,54 @@
 .gestion-lieux-prec-row {
     margin-top: 10px;
 }
+
+
+/* ====================================================================
+   12. IMPRESSION (@media print)
+   Le bouton « Imprimer » (Maj+F8) déclenche window.print(). À l'impression
+   on ne veut que le corps du formulaire ORPV : on masque tout le cadre
+   applicatif (en-tête, barre de menu, barre d'outils, barre d'état et
+   en-têtes d'onglets) et on neutralise les zones défilantes pour que la
+   totalité du formulaire sorte sur le papier.
+   ==================================================================== */
+@media print {
+    /* Cadre applicatif masqué : en-tête, barre de menu, barre d'état et la
+       barre d'outils (14 boutons-icônes) du formulaire. */
+    .app-header,
+    .orpv-menubar,
+    .app-statusbar,
+    .orpv-body .orpv-toolbar {
+        display: none !important;
+    }
+
+    /* Onglets fermables (HomeView) et onglets internes du formulaire : on
+       masque la bande d'onglets (libellés + croix de fermeture) ; seul le
+       contenu de l'onglet courant est imprimé. */
+    .orpv-tab-header,
+    .orpv-main-tabs::part(tabs),
+    .orpv-tabs::part(tabs) {
+        display: none !important;
+    }
+
+    /* Fonds blancs, sans ombre ni bordure de panneau, pour économiser l'encre
+       et obtenir un rendu propre. */
+    .orpv-view,
+    .orpv-body,
+    .orpv-main-tabs,
+    .orpv-tabs {
+        background: #ffffff !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    /* Les conteneurs défilants laissent passer tout leur contenu : sinon
+       seule la portion visible à l'écran serait imprimée. */
+    .app-content,
+    .orpv-main-tabs,
+    .orpv-main-tabs::part(content),
+    .orpv-tabs::part(content) {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+    }
+}
