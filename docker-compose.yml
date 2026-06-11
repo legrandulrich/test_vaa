@@ -1,0 +1,27 @@
+# Compose de DÉVELOPPEMENT (starter).
+#
+# Sert de support au Dev Container (.devcontainer/devcontainer.json -> service "app").
+# Le conteneur reste actif (sleep infinity) ; VS Code s'y attache, et tu y lances
+# le serveur de dev avec ./mvnw. Le JDK 25 est fourni par l'image Temurin, donc
+# pas besoin de surcharger JAVA_HOME ici.
+#
+# Tu peux remplacer / enrichir ce fichier par la suite (ex. ajouter un service
+# "db" Postgres/Oracle pour la future couche service + repository) : le Dev
+# Container reprendra automatiquement le contenu mis à jour.
+
+services:
+  app:
+    image: eclipse-temurin:25-jdk
+    working_dir: /workspace
+    volumes:
+      # Le code source, monté en direct depuis l'hôte.
+      - .:/workspace:cached
+      # Cache Maven persistant entre les rebuilds du conteneur.
+      - maven-repo:/root/.m2
+    ports:
+      - "8080:8080"
+    # Garde le conteneur en vie pour que le Dev Container puisse s'y attacher.
+    command: sleep infinity
+
+volumes:
+  maven-repo:

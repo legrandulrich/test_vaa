@@ -1,0 +1,12 @@
+# Normalisation des fins de ligne : projet édité sous Windows (hôte) mais exécuté
+# sous Linux (Dev Container / WSL). Les scripts shell DOIVENT rester en LF, sinon
+# ils échouent dans le conteneur avec « bad interpreter: /bin/sh^M ».
+
+* text=auto
+
+# Wrapper Maven et scripts shell : LF obligatoire (exécutés dans le conteneur Linux).
+mvnw text eol=lf
+*.sh text eol=lf
+
+# Wrapper Windows : CRLF.
+*.cmd text eol=crlf

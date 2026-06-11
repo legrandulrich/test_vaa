@@ -1,0 +1,39 @@
+{
+  // Dev Container basé sur Docker Compose.
+  // Le service ciblé est défini dans ../docker-compose.yml (à la racine du projet).
+  "name": "VAADIN app (dev)",
+
+  // Compose lu par le Dev Container. Tu peux en ajouter d'autres dans ce tableau
+  // (ex. un override) ou enrichir le compose racine plus tard (BD, etc.).
+  "dockerComposeFile": ["../docker-compose.yml"],
+
+  // Service du compose auquel VS Code s'attache.
+  "service": "app",
+
+  // Dossier monté ouvert par VS Code dans le conteneur (cf. volume du compose).
+  "workspaceFolder": "/workspace",
+
+  // Port du serveur de dev Vaadin / Spring Boot.
+  "forwardPorts": [8080],
+
+  // mvnw doit être exécutable côté Linux (le bit +x se perd parfois depuis Windows).
+  "postCreateCommand": "chmod +x mvnw",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-boot-dev-pack"
+      ],
+      "settings": {
+        "java.configuration.runtimes": [
+          {
+            "name": "JavaSE-25",
+            "path": "/opt/java/openjdk",
+            "default": true
+          }
+        ]
+      }
+    }
+  }
+}
