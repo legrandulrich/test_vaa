@@ -23,6 +23,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
@@ -32,12 +33,16 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 
+import com.example.util.MotifRecherche;
+import com.example.util.OrganismePourvoyeur;
+import com.example.util.OrganismesPourvoyeurs;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 /**
  * Vue de gestion des organismes pourvoyeurs (ORPV).
@@ -95,11 +100,24 @@ public class Tcmgorg1MainView extends Div {
     private TextField anneeFinActiviteField;
     private TextField moisFermetureField;
 
+    // --- Onglet accréditation ---
+    private Grid<Accreditation> accreditationGrid;
+
+    /** Onglet « Adresse secondaire » ; son libellé porte le nombre d'adresses (0 ou 1). */
+    private Tab adresseSecondaireTab;
+
     /** Barre d'outils ; son contenu bascule entre mode principal et mode interrogation. */
     private Div barre;
 
     /** Action de fermeture de l'onglet hôte, injectée par {@link HomeView}. */
     private Runnable fermetureAction;
+
+    /** Jeu de données fictives parcouru par les boutons de navigation. */
+    private final List<OrganismePourvoyeur> enregistrements =
+            OrganismesPourvoyeurs.generer(2000);
+
+    /** Position courante (base 0) dans {@link #enregistrements}. */
+    private int indexCourant;
 
     public Tcmgorg1MainView() {
         // HomeView est constitué uniquement du corps du formulaire :
@@ -110,14 +128,16 @@ public class Tcmgorg1MainView extends Div {
                 creerLigneOptions(),
                 creerOnglets(),
                 creerFormulaireComplement());
+
+        // Affiche le premier enregistrement fictif dès la construction (la barre
+        // d'état n'est mise à jour qu'une fois la vue attachée, cf. onAttach).
+        afficherEnregistrement(0);
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        MainLayout.rechercher(this)
-                .ifPresent(layout -> layout.getStatusBar()
-                        .setMessage("Gestion des organismes pourvoyeurs | Prêt"));
+        majBarreStatut();
     }
 
     // ------------------------------------------------------------------
@@ -158,6 +178,7 @@ public class Tcmgorg1MainView extends Div {
         barre.removeAll();
         barre.add(boutonsInterrogation());
         activerLookupCodeOrpv(true);
+        effacerChamps();
     }
 
     /**
@@ -169,6 +190,56 @@ public class Tcmgorg1MainView extends Div {
         if (codeOrpvLookupButton != null) {
             codeOrpvLookupButton.setEnabled(actif);
         }
+    }
+
+    /**
+     * Vide tous les champs du formulaire (champs texte, zone de remarque et cases
+     * à cocher) afin de préparer la saisie des critères d'interrogation. Appelée
+     * au passage en mode interrogation.
+     */
+    private void effacerChamps() {
+        // Section identification
+        codeOrpvField.clear();
+        siruField.clear();
+        messField.clear();
+        acronymeField.clear();
+        nomField.clear();
+        autreNomField.clear();
+        villeCodeField.clear();
+        villeLibelleField.clear();
+
+        // Options (cases à cocher)
+        payeurFraisIndirectCheckbox.clear();
+        comptabilisationFondsInternesCheckbox.clear();
+        fondsDotationCheckbox.clear();
+
+        // Onglet adresse principale
+        adressePrincipaleLigne1Field.clear();
+        adressePrincipaleLigne2Field.clear();
+        adressePrincipaleLigne3Field.clear();
+        codePostalField.clear();
+
+        // Onglet adresse secondaire
+        adresseSecondaireLigne1Field.clear();
+        adresseSecondaireLigne2Field.clear();
+        adresseSecondaireLigne3Field.clear();
+        codePostalSecondaireField.clear();
+
+        // Onglet remarque
+        remarqueArea.clear();
+
+        // Onglet accréditation : grille réinitialisée à des lignes vierges
+        if (accreditationGrid != null) {
+            accreditationGrid.setItems(accreditationsVierges());
+        }
+
+        // Section bas de formulaire
+        categorieCodeField.clear();
+        categorieLibelleField.clear();
+        siteWwwField.clear();
+        codeRevenuMeqField.clear();
+        anneeFinActiviteField.clear();
+        moisFermetureField.clear();
     }
 
     /** Les 14 boutons de la barre d'outils principale, recréés à chaque appel. */
@@ -200,16 +271,18 @@ public class Tcmgorg1MainView extends Div {
                         Key.KEY_E, KeyModifier.CONTROL),
                 separateur(),
                 // 8 à 11 — navigation entre enregistrements
-                boutonOutil("premier",
-                        "Aller au premier enregistrement"),
-                boutonOutilNavigation("precedent",
+                boutonOutilAction("premier",
+                        "Aller au premier enregistrement",
+                        this::allerPremier),
+                boutonOutilNavigationAction("precedent",
                         "Aller à l'enregistrement précédent (Flèche haut)",
-                        Key.ARROW_UP),
-                boutonOutilNavigation("suivant",
+                        Key.ARROW_UP, this::allerPrecedent),
+                boutonOutilNavigationAction("suivant",
                         "Aller à l'enregistrement suivant (Flèche bas)",
-                        Key.ARROW_DOWN),
-                boutonOutil("dernier",
-                        "Aller au dernier enregistrement"),
+                        Key.ARROW_DOWN, this::allerSuivant),
+                boutonOutilAction("dernier",
+                        "Aller au dernier enregistrement",
+                        this::allerDernier),
                 separateur(),
                 // 12 à 13 — enregistrements
                 boutonOutil("nouveau",
@@ -308,6 +381,14 @@ public class Tcmgorg1MainView extends Div {
         return bouton;
     }
 
+    /** Bouton de navigation (raccourci flèche) doté en plus d'une action au clic. */
+    private Button boutonOutilNavigationAction(String icone, String infoBulle, Key touche,
+            Runnable action) {
+        Button bouton = boutonOutilNavigation(icone, infoBulle, touche);
+        bouton.addClickListener(event -> action.run());
+        return bouton;
+    }
+
     /** Séparateur vertical entre deux groupes de boutons. */
     private Span separateur() {
         Span sep = new Span();
@@ -335,11 +416,111 @@ public class Tcmgorg1MainView extends Div {
         }
     }
 
+    // ------------------------------------------------------------------
+    // Navigation entre enregistrements (premier / précédent / suivant / dernier)
+    // ------------------------------------------------------------------
+
+    /** Va au premier enregistrement. */
+    private void allerPremier() {
+        afficherEnregistrement(0);
+    }
+
+    /** Va à l'enregistrement précédent (s'arrête au premier). */
+    private void allerPrecedent() {
+        afficherEnregistrement(indexCourant - 1);
+    }
+
+    /** Va à l'enregistrement suivant (s'arrête au dernier). */
+    private void allerSuivant() {
+        afficherEnregistrement(indexCourant + 1);
+    }
+
+    /** Va au dernier enregistrement. */
+    private void allerDernier() {
+        afficherEnregistrement(enregistrements.size() - 1);
+    }
+
+    /**
+     * Positionne le curseur sur l'enregistrement {@code index} (borné à la plage
+     * valide), reporte ses valeurs dans le formulaire et rafraîchit la barre
+     * d'état.
+     */
+    private void afficherEnregistrement(int index) {
+        if (enregistrements.isEmpty()) {
+            return;
+        }
+        indexCourant = Math.max(0, Math.min(index, enregistrements.size() - 1));
+        appliquer(enregistrements.get(indexCourant));
+        majBarreStatut();
+    }
+
+    /** Reporte les valeurs d'un enregistrement dans tous les champs du formulaire. */
+    private void appliquer(OrganismePourvoyeur o) {
+        // Section identification
+        codeOrpvField.setValue(o.codeOrpv());
+        siruField.setValue(o.siru());
+        messField.setValue(o.mess());
+        acronymeField.setValue(o.acronyme());
+        nomField.setValue(o.nom());
+        autreNomField.setValue(o.autreNom());
+        villeCodeField.setValue(o.villeCode());
+        villeLibelleField.setValue(o.villeLibelle());
+
+        // Options (cases à cocher)
+        payeurFraisIndirectCheckbox.setValue(o.payeurFraisIndirect());
+        comptabilisationFondsInternesCheckbox.setValue(o.comptabilisationFondsInternes());
+        fondsDotationCheckbox.setValue(o.fondsDotation());
+
+        // Onglet adresse principale
+        var principale = o.adressePrincipale();
+        adressePrincipaleLigne1Field.setValue(principale.ligne1());
+        adressePrincipaleLigne2Field.setValue(principale.ligne2());
+        adressePrincipaleLigne3Field.setValue(principale.ligne3());
+        codePostalField.setValue(principale.codePostal());
+
+        // Onglet adresse secondaire (le libellé porte le compte : 0 ou 1)
+        var secondaire = o.adresseSecondaire();
+        adresseSecondaireLigne1Field.setValue(secondaire.ligne1());
+        adresseSecondaireLigne2Field.setValue(secondaire.ligne2());
+        adresseSecondaireLigne3Field.setValue(secondaire.ligne3());
+        codePostalSecondaireField.setValue(secondaire.codePostal());
+        adresseSecondaireTab.setLabel(
+                "Adresse secondaire (" + (secondaire.ligne1().isBlank() ? 0 : 1) + ")");
+
+        // Onglet accréditation : lignes propres à l'enregistrement
+        accreditationGrid.setItems(accreditationsPour(o));
+
+        // Onglet remarque
+        remarqueArea.setValue(o.remarque());
+
+        // Section bas de formulaire
+        categorieCodeField.setValue(o.categorieCode());
+        categorieLibelleField.setValue(o.categorieLibelle());
+        siteWwwField.setValue(o.siteWww());
+        codeRevenuMeqField.setValue(o.codeRevenuMeq());
+        anneeFinActiviteField.setValue(o.anneeFinActivite());
+        moisFermetureField.setValue(o.moisFermeture());
+    }
+
+    /**
+     * Met à jour la barre d'état partagée avec la position courante, p. ex.
+     * « Eng. 1/2000 ». Sans effet tant que la vue n'est pas attachée à son
+     * {@link MainLayout}.
+     */
+    private void majBarreStatut() {
+        MainLayout.rechercher(this)
+                .ifPresent(layout -> layout.getStatusBar().setMessage(
+                        "Gestion des organismes pourvoyeurs | Eng. "
+                                + (indexCourant + 1) + "/" + enregistrements.size()));
+    }
+
     /** Bloc supérieur : codes, nom, ville. */
     private FormLayout creerFormulaireIdentite() {
         codeOrpvField = champTexte("11767");
         codeOrpvField.setWidthFull();
         codeOrpvLookupButton = boutonRecherche();
+        // Identifiant stable pour les tests browserless (mode interrogation).
+        codeOrpvLookupButton.setId("code-orpv-lookup");
         // Désactivé par défaut : seul le mode interrogation l'active.
         codeOrpvLookupButton.setEnabled(false);
         codeOrpvLookupButton.addClickListener(e -> ouvrirListeValeurs(
@@ -414,7 +595,7 @@ public class Tcmgorg1MainView extends Div {
         onglets.addClassName("orpv-tabs");
 
         onglets.add("Adresse principale", creerContenuAdressePrincipale());
-        onglets.add("Adresse secondaire (0)", creerContenuAdresseSecondaire());
+        adresseSecondaireTab = onglets.add("Adresse secondaire (0)", creerContenuAdresseSecondaire());
         onglets.add("Accréditation", creerContenuAccreditation());
         onglets.add("Remarque", creerContenuRemarque());
         return onglets;
@@ -483,10 +664,11 @@ public class Tcmgorg1MainView extends Div {
      */
     private Component creerContenuAccreditation() {
         Grid<Accreditation> grille = new Grid<>();
+        accreditationGrid = grille;
         grille.addClassName("accreditation-grid");
         grille.setWidthFull();
         grille.setHeight("150px");
-        grille.setItems(accreditationsSimulees());
+        // Les lignes sont renseignées par appliquer(...) selon l'enregistrement courant.
 
         grille.addComponentColumn(acc -> celluleEditable(acc.debut, v -> acc.debut = v))
                 .setHeader("Début").setWidth("90px").setFlexGrow(0);
@@ -526,13 +708,29 @@ public class Tcmgorg1MainView extends Div {
     }
 
     /**
-     * Liste temporaire d'accréditations, simulant le résultat d'une requête en
-     * base : une ligne renseignée suivie de lignes vierges prêtes à la saisie.
-     * À remplacer ultérieurement par les données réelles.
+     * Convertit les accréditations de l'enregistrement en lignes éditables de la
+     * grille, complétées de lignes vierges (au moins quatre rangées au total) pour
+     * laisser de la place à la saisie.
      */
-    private List<Accreditation> accreditationsSimulees() {
+    private List<Accreditation> accreditationsPour(OrganismePourvoyeur o) {
+        List<Accreditation> lignes = new ArrayList<>();
+        for (var a : o.accreditations()) {
+            lignes.add(new Accreditation(a.debut(), a.fin(), a.organisme(),
+                    a.creation(), a.modification()));
+        }
+        while (lignes.size() < 4) {
+            lignes.add(new Accreditation("", "", "", "", ""));
+        }
+        return lignes;
+    }
+
+    /**
+     * Lignes d'accréditation entièrement vierges, utilisées pour réinitialiser la
+     * grille au passage en mode interrogation.
+     */
+    private List<Accreditation> accreditationsVierges() {
         return List.of(
-                new Accreditation("", "3999", "", "2026-06-10", "2026-06-10"),
+                new Accreditation("", "", "", "", ""),
                 new Accreditation("", "", "", "", ""),
                 new Accreditation("", "", "", "", ""),
                 new Accreditation("", "", "", "", ""));
@@ -583,7 +781,7 @@ public class Tcmgorg1MainView extends Div {
         Runnable rechercher = () -> {
             String motif = rechField.getValue();
             List<String> resultats = tousLesOrganismes.stream()
-                    .filter(nom -> correspondMotif(nom, motif))
+                    .filter(nom -> MotifRecherche.correspond(nom, motif))
                     .toList();
             appliquerResultats(grille, resultats);
         };
@@ -668,9 +866,12 @@ public class Tcmgorg1MainView extends Div {
     private FormLayout creerFormulaireComplement() {
         categorieCodeField = champTexte("61");
         categorieCodeField.setWidth("70px");
+        categorieCodeField.setId("categorie-code");
         categorieLookupButton = boutonRecherche();
+        categorieLookupButton.setId("categorie-lookup");
         categorieLibelleField = champTexte("Non canadien: compagnies");
         categorieLibelleField.setWidthFull();
+        categorieLibelleField.setId("categorie-libelle");
         categorieLookupButton.addClickListener(e -> ouvrirListeCategories());
         HorizontalLayout categorieRow = new HorizontalLayout(
                 categorieCodeField, categorieLookupButton, categorieLibelleField);
@@ -682,6 +883,7 @@ public class Tcmgorg1MainView extends Div {
 
         siteWwwField = champTexte("http://www.aeitecno.com/");
         siteWwwField.setWidthFull();
+        siteWwwField.setId("site-www");
 
         codeRevenuMeqField = champTexte("430");
         codeRevenuMeqField.setWidthFull();
@@ -958,7 +1160,7 @@ public class Tcmgorg1MainView extends Div {
         Runnable rechercher = () -> {
             String motif = rechField.getValue();
             List<Lieu> resultats = tousLesLieux.stream()
-                    .filter(lieu -> correspond(lieu, motif))
+                    .filter(lieu -> MotifRecherche.correspond(lieu.nomLieu(), motif))
                     .toList();
             appliquerResultats(grille, resultats);
         };
@@ -997,34 +1199,6 @@ public class Tcmgorg1MainView extends Div {
         if (!resultats.isEmpty()) {
             grille.select(resultats.get(0));
         }
-    }
-
-    /**
-     * Indique si un lieu correspond au motif de recherche, en comparant son nom.
-     *
-     * @see #correspondMotif(String, String)
-     */
-    private static boolean correspond(Lieu lieu, String motif) {
-        return correspondMotif(lieu.nomLieu(), motif);
-    }
-
-    /**
-     * Indique si un texte correspond au motif de recherche. Le motif est
-     * interprété façon « LIKE » SQL : le caractère {@code %} y joue le rôle de
-     * joker. Un motif vide ou réduit à {@code %} laisse tout passer. La
-     * comparaison est insensible à la casse.
-     */
-    private static boolean correspondMotif(String texte, String motif) {
-        String m = (motif == null) ? "" : motif.trim();
-        if (m.isEmpty() || m.equals("%")) {
-            return true;
-        }
-        StringBuilder regex = new StringBuilder();
-        for (char c : m.toCharArray()) {
-            regex.append(c == '%' ? ".*" : Pattern.quote(String.valueOf(c)));
-        }
-        return Pattern.compile(regex.toString(), Pattern.CASE_INSENSITIVE)
-                .matcher(texte == null ? "" : texte).find();
     }
 
     /**
@@ -1117,7 +1291,7 @@ public class Tcmgorg1MainView extends Div {
         Runnable rechercher = () -> {
             String motif = rechField.getValue();
             List<Categorie> resultats = toutesLesCategories.stream()
-                    .filter(categorie -> correspondMotif(categorie.description(), motif))
+                    .filter(categorie -> MotifRecherche.correspond(categorie.description(), motif))
                     .toList();
             appliquerResultats(grille, resultats);
         };
@@ -1142,6 +1316,7 @@ public class Tcmgorg1MainView extends Div {
                 e -> valider.accept(grille.asSingleSelect().getValue()));
         okButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
         okButton.addClassName("orpv-dialog-ok");
+        okButton.setId("categorie-ok");
 
         Button annulerButton = new Button("Annuler", e -> dialog.close());
         annulerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
