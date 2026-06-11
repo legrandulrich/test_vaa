@@ -43,6 +43,7 @@ import org.springframework.context.annotation.Scope;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Vue de gestion des organismes pourvoyeurs (ORPV).
@@ -782,7 +783,7 @@ public class Tcmgorg1MainView extends Div {
             String motif = rechField.getValue();
             List<String> resultats = tousLesOrganismes.stream()
                     .filter(nom -> MotifRecherche.correspond(nom, motif))
-                    .toList();
+                    .collect(java.util.stream.Collectors.toList());
             appliquerResultats(grille, resultats);
         };
         rechField.addKeyDownListener(Key.ENTER, e -> rechercher.run());
@@ -1161,7 +1162,7 @@ public class Tcmgorg1MainView extends Div {
             String motif = rechField.getValue();
             List<Lieu> resultats = tousLesLieux.stream()
                     .filter(lieu -> MotifRecherche.correspond(lieu.nomLieu(), motif))
-                    .toList();
+                    .collect(Collectors.toList());
             appliquerResultats(grille, resultats);
         };
         rechField.addKeyDownListener(Key.ENTER, e -> rechercher.run());
@@ -1292,7 +1293,7 @@ public class Tcmgorg1MainView extends Div {
             String motif = rechField.getValue();
             List<Categorie> resultats = toutesLesCategories.stream()
                     .filter(categorie -> MotifRecherche.correspond(categorie.description(), motif))
-                    .toList();
+                    .collect(java.util.stream.Collectors.toList());
             appliquerResultats(grille, resultats);
         };
         rechField.addKeyDownListener(Key.ENTER, e -> rechercher.run());
