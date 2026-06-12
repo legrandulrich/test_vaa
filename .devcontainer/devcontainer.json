@@ -19,11 +19,21 @@
   // mvnw doit être exécutable côté Linux (le bit +x se perd parfois depuis Windows).
   "postCreateCommand": "chmod +x mvnw",
 
+  // Outils installés dans le conteneur. Git permet versionner/committer depuis le conteneur.
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+
   "customizations": {
     "vscode": {
       "extensions": [
         "vscjava.vscode-java-pack",
-        "vmware.vscode-boot-dev-pack"
+        "vmware.vscode-boot-dev-pack",
+        // Maven pour Java (build, goals, arbre des dépendances).
+        "vscjava.vscode-maven",
+        // GitHub Copilot : complétion + chat.
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
       ],
       "settings": {
         "java.configuration.runtimes": [
@@ -32,7 +42,9 @@
             "path": "/opt/java/openjdk",
             "default": true
           }
-        ]
+        ],
+        // Copilot répond et commente en français.
+        "github.copilot.chat.localeOverride": "fr"
       }
     }
   }

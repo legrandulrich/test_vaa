@@ -1,0 +1,102 @@
+/* ====================================================================
+   theme2.css — Thème « Graphite » (sombre)
+
+   Variante sombre de SIRUL, pensée pour le confort visuel en environnement
+   peu éclairé. Surcharge les tokens de palette de app.css ET corrige les
+   quelques couleurs claires codées en dur (toolbar, carte de connexion,
+   fond des champs) pour rester cohérent en mode sombre.
+
+   IMPORTANT : ce thème va de pair avec le mode sombre de Lumo (attribut
+   theme="dark" posé sur <html> par le code Java) afin que les composants
+   Vaadin (champs, grilles, boîtes de dialogue) adoptent eux aussi le sombre.
+   ==================================================================== */
+:root {
+    /* Surfaces */
+    --orpv-app-bg: #1b2230;
+    --orpv-panel-bg: #232c3d;
+    --orpv-panel-border: #3a4661;
+    --orpv-panel-shadow: 0 6px 22px rgba(0, 0, 0, 0.55);
+
+    /* Champs et boutons */
+    --orpv-field-border: #44516b;
+    --orpv-lookup-bg: #2c3750;
+    --orpv-lookup-color: #c6d2e6;
+
+    /* Onglets internes */
+    --orpv-inner-tabs-bg: #1f2735;
+    --orpv-inner-tabs-border: #38435c;
+
+    /* Texte */
+    --orpv-text: #e6ebf3;
+    --orpv-text-muted: #9aa6ba;
+
+    /* Barre de menu + onglets fermables */
+    --orpv-menubar-bg: linear-gradient(180deg, #141c2b 0%, #0b111c 100%);
+    --orpv-menu-color: #dfe7f2;
+    --orpv-tab-close-color: #8893a6;
+    --orpv-tab-close-hover: #ff6b5e;
+
+    /* En-tête de l'accueil */
+    --orpv-header-bg: #232c3d;
+    --orpv-header-border: #3a4661;
+
+    /* Barre d'état */
+    --orpv-statusbar-bg: #1f2735;
+    --orpv-statusbar-border: #3a4661;
+    --orpv-statusbar-text: #c6d2e6;
+
+    /* Actions */
+    --orpv-danger: #ef5350;
+    --orpv-success: #4caf6a;
+    --orpv-danger-text: #fff5f4;
+    --orpv-success-text: #effaf2;
+}
+
+/* --- Correctifs des couleurs claires codées en dur dans app.css --- */
+
+/* Splash d'accueil : titre et sous-titre éclaircis pour rester lisibles. */
+.acceuil-titre {
+    color: #aab4c4;
+}
+
+.acceuil-soustitre {
+    color: #8e99ab;
+}
+
+/* Fond des champs de saisie du formulaire (app.css les force en blanc). */
+.orpv-body {
+    --vaadin-input-field-background: #1d2533;
+    --vaadin-input-field-border-color: #44516b;
+}
+
+/* Boîte de saisie « Gestion des lieux » : même correctif de fond. */
+.gestion-lieux-dialog {
+    --vaadin-input-field-background: #1d2533;
+    --vaadin-input-field-border-color: #44516b;
+}
+
+/* Barre d'outils (14 boutons) : dégradé clair d'origine remplacé par du sombre. */
+.orpv-body .orpv-toolbar {
+    background: linear-gradient(180deg, #2a3346 0%, #222a3a 100%);
+    border-color: #3a4661;
+    box-shadow: inset 0 1px 0 #313c52;
+}
+
+.orpv-tool-button:hover {
+    border-color: #5a6f96;
+    background: #2f3a51;
+}
+
+.orpv-tool-button:active {
+    border-color: #6f87b3;
+    background: #38445e;
+}
+
+/* Carte de connexion (fond blanc codé en dur). */
+.login-card {
+    background: #232c3d;
+}
+
+.login-card-titre {
+    color: #c6d2e6;
+}

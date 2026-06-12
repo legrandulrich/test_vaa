@@ -1,0 +1,103 @@
+/* ====================================================================
+   theme7.css — Thème « Nuit Boréale » (sombre, sarcelle)
+
+   Variante sombre de SIRUL inspirée des aurores boréales : fonds
+   bleu-vert abyssaux, accents sarcelle lumineux, texte menthe glacée.
+   Surcharge les tokens de palette de app.css ET corrige les quelques
+   couleurs claires codées en dur (toolbar, carte de connexion, fond
+   des champs) pour rester cohérent en mode sombre.
+
+   IMPORTANT : ce thème va de pair avec le mode sombre de Lumo (attribut
+   theme="dark" posé sur <html> par le code Java) afin que les composants
+   Vaadin (champs, grilles, boîtes de dialogue) adoptent eux aussi le sombre.
+   ==================================================================== */
+:root {
+    /* Surfaces */
+    --orpv-app-bg: #0e1f22;
+    --orpv-panel-bg: #15292d;
+    --orpv-panel-border: #2c4d52;
+    --orpv-panel-shadow: 0 6px 22px rgba(0, 0, 0, 0.55);
+
+    /* Champs et boutons */
+    --orpv-field-border: #36595f;
+    --orpv-lookup-bg: #1d3a3f;
+    --orpv-lookup-color: #a8d8d4;
+
+    /* Onglets internes */
+    --orpv-inner-tabs-bg: #112428;
+    --orpv-inner-tabs-border: #2a474c;
+
+    /* Texte */
+    --orpv-text: #ddf0ec;
+    --orpv-text-muted: #8fb2ac;
+
+    /* Barre de menu + onglets fermables */
+    --orpv-menubar-bg: linear-gradient(180deg, #0f3a3f 0%, #071c20 100%);
+    --orpv-menu-color: #d4eee9;
+    --orpv-tab-close-color: #7d9c98;
+    --orpv-tab-close-hover: #ff7a6b;
+
+    /* En-tête de l'accueil */
+    --orpv-header-bg: #15292d;
+    --orpv-header-border: #2c4d52;
+
+    /* Barre d'état */
+    --orpv-statusbar-bg: #112428;
+    --orpv-statusbar-border: #2c4d52;
+    --orpv-statusbar-text: #a8d8d4;
+
+    /* Actions */
+    --orpv-danger: #f0635a;
+    --orpv-success: #3fbf8c;
+    --orpv-danger-text: #fff2f0;
+    --orpv-success-text: #eafff7;
+}
+
+/* --- Correctifs des couleurs claires codées en dur dans app.css --- */
+
+/* Splash d'accueil : titre et sous-titre éclaircis pour rester lisibles. */
+.acceuil-titre {
+    color: #9cc4be;
+}
+
+.acceuil-soustitre {
+    color: #7da39d;
+}
+
+/* Fond des champs de saisie du formulaire (app.css les force en blanc). */
+.orpv-body {
+    --vaadin-input-field-background: #102327;
+    --vaadin-input-field-border-color: #36595f;
+}
+
+/* Boîte de saisie « Gestion des lieux » : même correctif de fond. */
+.gestion-lieux-dialog {
+    --vaadin-input-field-background: #102327;
+    --vaadin-input-field-border-color: #36595f;
+}
+
+/* Barre d'outils (14 boutons) : dégradé clair d'origine remplacé par du sombre. */
+.orpv-body .orpv-toolbar {
+    background: linear-gradient(180deg, #1a3438 0%, #142a2e 100%);
+    border-color: #2c4d52;
+    box-shadow: inset 0 1px 0 #224045;
+}
+
+.orpv-tool-button:hover {
+    border-color: #44757c;
+    background: #1e3c41;
+}
+
+.orpv-tool-button:active {
+    border-color: #569299;
+    background: #25484e;
+}
+
+/* Carte de connexion (fond blanc codé en dur). */
+.login-card {
+    background: #15292d;
+}
+
+.login-card-titre {
+    color: #a8d8d4;
+}

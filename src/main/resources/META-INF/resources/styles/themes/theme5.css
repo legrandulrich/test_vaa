@@ -1,0 +1,49 @@
+/* ====================================================================
+   theme5.css — Thème « Terracotta » (clair, chaud)
+
+   Variante méditerranéenne de SIRUL : sable chaud, surfaces crème et
+   en-tête terre cuite brûlée. Ambiance chaleureuse d'atelier de poterie,
+   loin des bleus administratifs habituels. Surcharge uniquement les
+   tokens de palette de app.css.
+   ==================================================================== */
+:root {
+    /* Surfaces */
+    --orpv-app-bg: #e3d4c3;
+    --orpv-panel-bg: #faf4ea;
+    --orpv-panel-border: #ab8c72;
+    --orpv-panel-shadow: 0 6px 20px rgba(94, 56, 28, 0.25);
+
+    /* Champs et boutons */
+    --orpv-field-border: #bda58c;
+    --orpv-lookup-bg: #f0e3d2;
+    --orpv-lookup-color: #8a4a2b;
+
+    /* Onglets internes */
+    --orpv-inner-tabs-bg: #f7efe3;
+    --orpv-inner-tabs-border: #d4bda4;
+
+    /* Texte */
+    --orpv-text: #38271c;
+    --orpv-text-muted: #80695a;
+
+    /* Barre de menu + onglets fermables */
+    --orpv-menubar-bg: linear-gradient(180deg, #b35433 0%, #7c3018 100%);
+    --orpv-menu-color: #fcefe6;
+    --orpv-tab-close-color: #a18876;
+    --orpv-tab-close-hover: #b3261e;
+
+    /* En-tête de l'accueil */
+    --orpv-header-bg: #fdfaf5;
+    --orpv-header-border: #cdb59c;
+
+    /* Barre d'état */
+    --orpv-statusbar-bg: #ecdfcd;
+    --orpv-statusbar-border: #c9b196;
+    --orpv-statusbar-text: #553c2b;
+
+    /* Actions */
+    --orpv-danger: #c23a2c;
+    --orpv-success: #4e8a3c;
+    --orpv-danger-text: #fff5ee;
+    --orpv-success-text: #f6fbf0;
+}

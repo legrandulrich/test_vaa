@@ -57,8 +57,10 @@
     --orpv-statusbar-text: #3a3a3a;
 
     /* Actions */
-    --orpv-danger: #e23b3b;            /* bouton « Quitter » */
-    --orpv-success: #36a84d;           /* bouton « Continuer » */
+    --orpv-danger: #e23b3b;            /* fond des boutons « danger » (Quitter, Connexion) */
+    --orpv-success: #36a84d;           /* fond des boutons « succès » (Continuer, OK) */
+    --orpv-danger-text: #ffffff;       /* texte des boutons « danger » */
+    --orpv-success-text: #ffffff;      /* texte des boutons « succès » */
 }
 
 
@@ -323,18 +325,18 @@
    par bouton pour obtenir le rouge / vert de la maquette. */
 .acceuil-bouton-quitter {
     --lumo-primary-color: var(--orpv-danger);
-    --lumo-primary-text-color: #ffffff;
+    --lumo-primary-text-color: var(--orpv-danger-text);
 }
 
 .acceuil-bouton-continuer {
     --lumo-primary-color: var(--orpv-success);
-    --lumo-primary-text-color: #ffffff;
+    --lumo-primary-text-color: var(--orpv-success-text);
 }
 
 /* Bouton « OK » des fenêtres modales (listes de valeurs) : fond vert. */
 .orpv-dialog-ok {
     --lumo-primary-color: var(--orpv-success);
-    --lumo-primary-text-color: #ffffff;
+    --lumo-primary-text-color: var(--orpv-success-text);
 }
 
 
@@ -512,7 +514,7 @@
 .login-bouton {
     margin-top: 6px;
     --lumo-primary-color: var(--orpv-danger);
-    --lumo-primary-text-color: #ffffff;
+    --lumo-primary-text-color: var(--orpv-danger-text);
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;

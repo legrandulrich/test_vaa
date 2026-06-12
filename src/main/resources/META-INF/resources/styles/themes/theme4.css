@@ -1,0 +1,49 @@
+/* ====================================================================
+   theme4.css — Thème « Émeraude » (clair, forêt)
+
+   Variante de présentation de SIRUL aux accents vert forêt et émeraude :
+   surfaces ivoire légèrement teintées de vert, en-tête sapin profond.
+   Évoque les registres reliés de cuir vert des bibliothèques. Surcharge
+   uniquement les tokens de palette de app.css.
+   ==================================================================== */
+:root {
+    /* Surfaces */
+    --orpv-app-bg: #ccdbd2;
+    --orpv-panel-bg: #f2f6f1;
+    --orpv-panel-border: #7d9486;
+    --orpv-panel-shadow: 0 6px 20px rgba(16, 56, 38, 0.25);
+
+    /* Champs et boutons */
+    --orpv-field-border: #97ab9e;
+    --orpv-lookup-bg: #dce8df;
+    --orpv-lookup-color: #2e5c44;
+
+    /* Onglets internes */
+    --orpv-inner-tabs-bg: #eef4ee;
+    --orpv-inner-tabs-border: #b5c8ba;
+
+    /* Texte */
+    --orpv-text: #1d2b23;
+    --orpv-text-muted: #5d6f64;
+
+    /* Barre de menu + onglets fermables */
+    --orpv-menubar-bg: linear-gradient(180deg, #1f6b48 0%, #0d3a26 100%);
+    --orpv-menu-color: #e7f3ea;
+    --orpv-tab-close-color: #7e9087;
+    --orpv-tab-close-hover: #c0392b;
+
+    /* En-tête de l'accueil */
+    --orpv-header-bg: #fbfdfb;
+    --orpv-header-border: #aec2b4;
+
+    /* Barre d'état */
+    --orpv-statusbar-bg: #dfe9e1;
+    --orpv-statusbar-border: #adc1b3;
+    --orpv-statusbar-text: #2e4437;
+
+    /* Actions */
+    --orpv-danger: #c8453a;
+    --orpv-success: #20834f;
+    --orpv-danger-text: #fff4f2;
+    --orpv-success-text: #f0fbf4;
+}

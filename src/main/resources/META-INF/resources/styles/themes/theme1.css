@@ -1,0 +1,52 @@
+/* ====================================================================
+   theme1.css — Thème « Ardoise » (corporate, clair)
+
+   Variante de présentation de SIRUL. Surcharge UNIQUEMENT les tokens
+   de palette définis dans app.css (:root) ; toute la structure reste
+   portée par app.css. Cette feuille est attachée dynamiquement par-dessus
+   app.css (donc elle l'emporte sur les valeurs par défaut).
+
+   Identité : bleu ardoise profond et contrasté, façon application de
+   gestion d'entreprise. Surfaces fraîches, en-tête marine soutenu.
+   ==================================================================== */
+:root {
+    /* Surfaces */
+    --orpv-app-bg: #aeb9c7;
+    --orpv-panel-bg: #eceff3;
+    --orpv-panel-border: #7c8799;
+    --orpv-panel-shadow: 0 6px 20px rgba(13, 26, 48, 0.28);
+
+    /* Champs et boutons */
+    --orpv-field-border: #98a2b1;
+    --orpv-lookup-bg: #dde2e9;
+    --orpv-lookup-color: #3c4757;
+
+    /* Onglets internes */
+    --orpv-inner-tabs-bg: #f1f3f6;
+    --orpv-inner-tabs-border: #bcc4d0;
+
+    /* Texte */
+    --orpv-text: #1c2530;
+    --orpv-text-muted: #5e6877;
+
+    /* Barre de menu + onglets fermables */
+    --orpv-menubar-bg: linear-gradient(180deg, #34507f 0%, #182c4c 100%);
+    --orpv-menu-color: #e9eef7;
+    --orpv-tab-close-color: #828c99;
+    --orpv-tab-close-hover: #c0392b;
+
+    /* En-tête de l'accueil */
+    --orpv-header-bg: #ffffff;
+    --orpv-header-border: #aeb6c2;
+
+    /* Barre d'état */
+    --orpv-statusbar-bg: #dee2e9;
+    --orpv-statusbar-border: #b3bcc8;
+    --orpv-statusbar-text: #34404d;
+
+    /* Actions */
+    --orpv-danger: #cf3b3b;
+    --orpv-success: #2f9e4a;
+    --orpv-danger-text: #fdf3f3;
+    --orpv-success-text: #f1faf3;
+}

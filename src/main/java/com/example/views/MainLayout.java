@@ -1,5 +1,6 @@
 package com.example.views;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -19,6 +20,24 @@ import java.util.Optional;
 @StyleSheet("styles/app.css")
 public class MainLayout extends VerticalLayout implements RouterLayout {
 
+    /**
+     * Réapplique le thème mémorisé dans le navigateur (localStorage), choisi via
+     * Aide ▸ Thème. Exécuté à chaque attachement de la mise en page racine, ce
+     * qui couvre le rechargement complet de n'importe quelle vue. Sans choix
+     * mémorisé, le thème par défaut de app.css reste en place.
+     */
+    private static final String JS_RESTAURER_THEME =
+            "const href = window.localStorage.getItem('orpv-theme-href');"
+          + "if (href) {"
+          + "  let lien = document.getElementById('orpv-theme');"
+          + "  if (!lien) { lien = document.createElement('link'); lien.id = 'orpv-theme';"
+          + "    lien.rel = 'stylesheet'; document.head.appendChild(lien); }"
+          + "  if (lien.getAttribute('href') !== href) { lien.setAttribute('href', href); }"
+          + "  if (window.localStorage.getItem('orpv-theme-dark') === 'true') {"
+          + "    document.documentElement.setAttribute('theme', 'dark'); }"
+          + "  else { document.documentElement.removeAttribute('theme'); }"
+          + "}";
+
     private final Div contenu = new Div();
     private final StatusBar statusBar = new StatusBar();
 
@@ -32,6 +51,12 @@ public class MainLayout extends VerticalLayout implements RouterLayout {
 
         add(contenu, statusBar);
         setFlexGrow(1, contenu);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        attachEvent.getUI().getPage().executeJs(JS_RESTAURER_THEME);
     }
 
     @Override

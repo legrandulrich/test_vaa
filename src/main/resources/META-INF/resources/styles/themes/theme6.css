@@ -1,0 +1,49 @@
+/* ====================================================================
+   theme6.css — Thème « Améthyste » (clair, violet)
+
+   Variante de SIRUL aux accents améthyste et lavande : fond lilas
+   grisé, surfaces blanc nacré, en-tête violet profond. Élégant et
+   distinctif, façon papeterie de luxe. Surcharge uniquement les tokens
+   de palette de app.css.
+   ==================================================================== */
+:root {
+    /* Surfaces */
+    --orpv-app-bg: #d8d2e2;
+    --orpv-panel-bg: #f7f5fa;
+    --orpv-panel-border: #8d82a4;
+    --orpv-panel-shadow: 0 6px 20px rgba(53, 32, 84, 0.25);
+
+    /* Champs et boutons */
+    --orpv-field-border: #a89dbd;
+    --orpv-lookup-bg: #e7e1f0;
+    --orpv-lookup-color: #5a3f86;
+
+    /* Onglets internes */
+    --orpv-inner-tabs-bg: #f3f0f8;
+    --orpv-inner-tabs-border: #c6bcd8;
+
+    /* Texte */
+    --orpv-text: #271f33;
+    --orpv-text-muted: #6c6280;
+
+    /* Barre de menu + onglets fermables */
+    --orpv-menubar-bg: linear-gradient(180deg, #5d3d92 0%, #341f5c 100%);
+    --orpv-menu-color: #efe9f9;
+    --orpv-tab-close-color: #8d839e;
+    --orpv-tab-close-hover: #c0392b;
+
+    /* En-tête de l'accueil */
+    --orpv-header-bg: #fdfcfe;
+    --orpv-header-border: #beb3cf;
+
+    /* Barre d'état */
+    --orpv-statusbar-bg: #e6e1ee;
+    --orpv-statusbar-border: #bdb1ce;
+    --orpv-statusbar-text: #41355a;
+
+    /* Actions */
+    --orpv-danger: #cf3b55;
+    --orpv-success: #34935e;
+    --orpv-danger-text: #fdf4fb;
+    --orpv-success-text: #f3faf5;
+}

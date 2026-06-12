@@ -1,0 +1,48 @@
+/* ====================================================================
+   theme3.css — Thème « Azur » (clair, lumineux)
+
+   Variante claire et aérée de SIRUL : surfaces blanches, fond très clair,
+   accent azur. Look moderne et reposant, lisibilité maximale. Surcharge
+   uniquement les tokens de palette de app.css.
+   ==================================================================== */
+:root {
+    /* Surfaces */
+    --orpv-app-bg: #eef3f8;
+    --orpv-panel-bg: #ffffff;
+    --orpv-panel-border: #cdd6e2;
+    --orpv-panel-shadow: 0 8px 24px rgba(31, 78, 121, 0.12);
+
+    /* Champs et boutons */
+    --orpv-field-border: #c2ccd9;
+    --orpv-lookup-bg: #eaf1f8;
+    --orpv-lookup-color: #3a6ea5;
+
+    /* Onglets internes */
+    --orpv-inner-tabs-bg: #f7fafd;
+    --orpv-inner-tabs-border: #d6e0ec;
+
+    /* Texte */
+    --orpv-text: #1f2a37;
+    --orpv-text-muted: #6b7a8d;
+
+    /* Barre de menu + onglets fermables */
+    --orpv-menubar-bg: linear-gradient(180deg, #2f6fb0 0%, #1d4e7a 100%);
+    --orpv-menu-color: #eaf2fb;
+    --orpv-tab-close-color: #9aa7b6;
+    --orpv-tab-close-hover: #d9534f;
+
+    /* En-tête de l'accueil */
+    --orpv-header-bg: #ffffff;
+    --orpv-header-border: #dbe3ec;
+
+    /* Barre d'état */
+    --orpv-statusbar-bg: #e8eff6;
+    --orpv-statusbar-border: #d2dbe6;
+    --orpv-statusbar-text: #33424f;
+
+    /* Actions */
+    --orpv-danger: #d9534f;
+    --orpv-success: #2f9e6f;
+    --orpv-danger-text: #fff4f3;
+    --orpv-success-text: #eefaf4;
+}
