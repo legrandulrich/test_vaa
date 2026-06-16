@@ -433,30 +433,37 @@ public class Tcmgorg1MainView extends Div {
             if (root.__orpvInstalled) { return; }
             root.__orpvInstalled = true;
 
-            const estChamp = (el) => el && (el.localName === 'vaadin-text-field'
-                    || el.localName === 'vaadin-text-area'
-                    || el.localName === 'vaadin-password-field');
+            // L'input est dans le light DOM : l'événement de focus cible l'<input>
+            // lui-même, d'où la remontée vers le host du champ via closest().
+            const champHote = (el) => (el && el.closest)
+                    ? el.closest('vaadin-text-field, vaadin-text-area, vaadin-password-field')
+                    : null;
 
             const interne = (hote) => {
                 if (!hote) { return null; }
+                // Vaadin 24+/25 place l'input dans le light DOM (slotté), pas dans le shadow.
+                let i = hote.querySelector ? hote.querySelector('input, textarea') : null;
+                if (i) { return i; }
                 if (hote.shadowRoot) {
-                    const i = hote.shadowRoot.querySelector('input, textarea');
+                    i = hote.shadowRoot.querySelector('input, textarea');
                     if (i) { return i; }
                 }
                 return (hote.localName === 'input' || hote.localName === 'textarea') ? hote : null;
             };
 
             root.addEventListener('focusin', (e) => {
-                if (estChamp(e.target)) { root.__orpvLast = e.target; }
+                const hote = champHote(e.target);
+                if (hote) { root.__orpvLast = hote; }
             }, true);
 
             // À la perte du focus, on mémorise la sélection : un navigateur peut la
             // replier après le blur, alors qu'on en a besoin lors du clic sur un bouton.
             root.addEventListener('focusout', (e) => {
-                if (estChamp(e.target)) {
-                    const i = interne(e.target);
+                const hote = champHote(e.target);
+                if (hote) {
+                    const i = interne(hote);
                     if (i) {
-                        root.__orpvSel = { hote: e.target, debut: i.selectionStart, fin: i.selectionEnd };
+                        root.__orpvSel = { hote: hote, debut: i.selectionStart, fin: i.selectionEnd };
                     }
                 }
             }, true);
@@ -646,7 +653,8 @@ public class Tcmgorg1MainView extends Div {
 
         Runnable rechercher = () -> {
             zone.getElement().executeJs(
-                    "const i = this.shadowRoot ? this.shadowRoot.querySelector('textarea') : null;"
+                    "const i = this.querySelector('textarea')"
+                  + "    || (this.shadowRoot ? this.shadowRoot.querySelector('textarea') : null);"
                   + "const t = $0;"
                   + "if (!i || !t) { return false; }"
                   + "const idx = i.value.indexOf(t);"
