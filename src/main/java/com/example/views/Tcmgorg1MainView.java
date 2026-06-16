@@ -19,6 +19,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -138,6 +139,7 @@ public class Tcmgorg1MainView extends Div {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        installerPressePapier();
         majBarreStatut();
     }
 
@@ -258,18 +260,10 @@ public class Tcmgorg1MainView extends Div {
                         this::imprimer, Key.F8, KeyModifier.SHIFT),
                 separateur(),
                 // 4 à 7 — édition
-                boutonOutil("couper",
-                        "Couper le texte sélectionné (Ctrl+X)",
-                        Key.KEY_X, KeyModifier.CONTROL),
-                boutonOutil("copier",
-                        "Copier le texte sélectionné (Ctrl+C)",
-                        Key.KEY_C, KeyModifier.CONTROL),
-                boutonOutil("coller",
-                        "Coller le texte sélectionné (Ctrl+V)",
-                        Key.KEY_V, KeyModifier.CONTROL),
-                boutonOutil("editer",
-                        "Éditer le contenu du champ de la zone de texte où le curseur est positionné (Ctrl+E)",
-                        Key.KEY_E, KeyModifier.CONTROL),
+                boutonCouper(),
+                boutonCopier(),
+                boutonColler(),
+                boutonEditer(),
                 separateur(),
                 // 8 à 11 — navigation entre enregistrements
                 boutonOutilAction("premier",
@@ -312,18 +306,10 @@ public class Tcmgorg1MainView extends Div {
                         "Imprimer la fenêtre courante (Maj+F8)",
                         this::imprimer, Key.F8, KeyModifier.SHIFT),
                 separateur(),
-                boutonOutil("couper",
-                        "Couper le texte sélectionné (Ctrl+X)",
-                        Key.KEY_X, KeyModifier.CONTROL),
-                boutonOutil("copier",
-                        "Copier le texte sélectionné (Ctrl+C)",
-                        Key.KEY_C, KeyModifier.CONTROL),
-                boutonOutil("coller",
-                        "Coller le texte sélectionné (Ctrl+V)",
-                        Key.KEY_V, KeyModifier.CONTROL),
-                boutonOutil("editer",
-                        "Éditer le contenu du champ de la zone de texte où le curseur est positionné (Ctrl+E)",
-                        Key.KEY_E, KeyModifier.CONTROL),
+                boutonCouper(),
+                boutonCopier(),
+                boutonColler(),
+                boutonEditer(),
                 separateur(),
                 boutonOutil("executer",
                         "Exécuter l'interrogation"),
@@ -423,6 +409,269 @@ public class Tcmgorg1MainView extends Div {
      */
     private void imprimer() {
         getUI().ifPresent(ui -> ui.getPage().executeJs("window.print()"));
+    }
+
+    // ------------------------------------------------------------------
+    // Édition : couper / copier / coller / éditer
+    // ------------------------------------------------------------------
+
+    /**
+     * Script client installé une seule fois sur l'élément de la vue. Il suit le
+     * dernier champ de saisie ({@code vaadin-text-field} / {@code vaadin-text-area})
+     * ayant eu le focus dans le formulaire et expose, sur ce même élément, les
+     * fonctions de couper / copier / coller / édition. Le presse-papier
+     * ({@code __orpvClip}) est conservé côté navigateur : un texte coupé ou copié
+     * dans un champ peut donc être collé dans un autre. Chaque modification est
+     * répercutée vers le serveur via les événements {@code input} et {@code change}.
+     *
+     * <p>Le suivi est limité à la sous-arborescence de la vue ; les champs des
+     * fenêtres modales (rendues dans un calque détaché) ne sont pas pris en compte,
+     * ce qui préserve le champ cible pendant l'édition.</p>
+     */
+    private static final String CLIPBOARD_JS = """
+            const root = this;
+            if (root.__orpvInstalled) { return; }
+            root.__orpvInstalled = true;
+
+            const estChamp = (el) => el && (el.localName === 'vaadin-text-field'
+                    || el.localName === 'vaadin-text-area'
+                    || el.localName === 'vaadin-password-field');
+
+            const interne = (hote) => {
+                if (!hote) { return null; }
+                if (hote.shadowRoot) {
+                    const i = hote.shadowRoot.querySelector('input, textarea');
+                    if (i) { return i; }
+                }
+                return (hote.localName === 'input' || hote.localName === 'textarea') ? hote : null;
+            };
+
+            root.addEventListener('focusin', (e) => {
+                if (estChamp(e.target)) { root.__orpvLast = e.target; }
+            }, true);
+
+            // À la perte du focus, on mémorise la sélection : un navigateur peut la
+            // replier après le blur, alors qu'on en a besoin lors du clic sur un bouton.
+            root.addEventListener('focusout', (e) => {
+                if (estChamp(e.target)) {
+                    const i = interne(e.target);
+                    if (i) {
+                        root.__orpvSel = { hote: e.target, debut: i.selectionStart, fin: i.selectionEnd };
+                    }
+                }
+            }, true);
+
+            const selection = (hote, i) => {
+                let d = i.selectionStart, f = i.selectionEnd;
+                if (d === f && root.__orpvSel && root.__orpvSel.hote === hote) {
+                    d = root.__orpvSel.debut;
+                    f = root.__orpvSel.fin;
+                }
+                return { debut: Math.min(d, f), fin: Math.max(d, f) };
+            };
+
+            const appliquer = (i, valeur, curseur) => {
+                i.value = valeur;
+                i.setSelectionRange(curseur, curseur);
+                i.dispatchEvent(new Event('input', { bubbles: true }));
+                i.dispatchEvent(new Event('change', { bubbles: true }));
+                i.focus();
+            };
+
+            root.__orpvCut = () => {
+                const hote = root.__orpvLast, i = interne(hote);
+                if (!i || i.readOnly || i.disabled) { return; }
+                const s = selection(hote, i);
+                if (s.debut === s.fin) { return; }
+                root.__orpvClip = i.value.substring(s.debut, s.fin);
+                try { if (navigator.clipboard) { navigator.clipboard.writeText(root.__orpvClip); } } catch (e) {}
+                appliquer(i, i.value.slice(0, s.debut) + i.value.slice(s.fin), s.debut);
+            };
+
+            root.__orpvCopy = () => {
+                const hote = root.__orpvLast, i = interne(hote);
+                if (!i) { return; }
+                const s = selection(hote, i);
+                if (s.debut === s.fin) { return; }
+                root.__orpvClip = i.value.substring(s.debut, s.fin);
+                try { if (navigator.clipboard) { navigator.clipboard.writeText(root.__orpvClip); } } catch (e) {}
+                i.focus();
+                i.setSelectionRange(s.debut, s.fin);
+            };
+
+            root.__orpvPaste = () => {
+                const hote = root.__orpvLast, i = interne(hote);
+                if (!i || i.readOnly || i.disabled) { return; }
+                const clip = root.__orpvClip || '';
+                if (!clip) { return; }
+                const s = selection(hote, i);
+                appliquer(i, i.value.slice(0, s.debut) + clip + i.value.slice(s.fin), s.debut + clip.length);
+            };
+
+            // Mémorise le champ cible puis renvoie son contenu pour la fenêtre Éditeur.
+            root.__orpvEditText = () => {
+                root.__orpvEditTarget = root.__orpvLast;
+                const i = interne(root.__orpvEditTarget);
+                return i ? i.value : null;
+            };
+
+            // Reporte le texte édité dans le champ mémorisé par __orpvEditText.
+            root.__orpvSetText = (texte) => {
+                const i = interne(root.__orpvEditTarget);
+                if (!i || i.readOnly || i.disabled) { return; }
+                const valeur = texte == null ? '' : texte;
+                appliquer(i, valeur, valeur.length);
+            };
+            """;
+
+    /** Installe (une seule fois) le script client de gestion du presse-papier. */
+    private void installerPressePapier() {
+        getElement().executeJs(CLIPBOARD_JS);
+    }
+
+    /**
+     * Bouton d'édition : le clic — comme le raccourci {@code Ctrl+touche} — appelle
+     * la fonction JavaScript {@code fonction} exposée sur l'élément de la vue.
+     */
+    private Button boutonEdition(String icone, String infoBulle, String fonction, Key touche) {
+        Button bouton = boutonOutil(icone, infoBulle);
+        bouton.addClickListener(e -> getElement()
+                .executeJs("this." + fonction + " && this." + fonction + "()"));
+        bouton.addClickShortcut(touche, KeyModifier.CONTROL);
+        return bouton;
+    }
+
+    private Button boutonCouper() {
+        return boutonEdition("couper",
+                "Couper le texte sélectionné (Ctrl+X)", "__orpvCut", Key.KEY_X);
+    }
+
+    private Button boutonCopier() {
+        return boutonEdition("copier",
+                "Copier le texte sélectionné (Ctrl+C)", "__orpvCopy", Key.KEY_C);
+    }
+
+    private Button boutonColler() {
+        return boutonEdition("coller",
+                "Coller le texte précédemment coupé ou copié (Ctrl+V)", "__orpvPaste", Key.KEY_V);
+    }
+
+    private Button boutonEditer() {
+        Button bouton = boutonOutil("editer",
+                "Éditer le contenu du champ de la zone de texte où le curseur est positionné (Ctrl+E)");
+        bouton.addClickListener(e -> editer());
+        bouton.addClickShortcut(Key.KEY_E, KeyModifier.CONTROL);
+        return bouton;
+    }
+
+    /**
+     * « Éditer » : récupère le contenu du dernier champ ayant eu le focus puis
+     * ouvre la fenêtre « Éditeur » pré-remplie. Si aucun champ n'est ciblé (valeur
+     * {@code null} renvoyée par le client), aucune fenêtre n'est ouverte.
+     */
+    private void editer() {
+        getElement().executeJs("return (this.__orpvEditText ? this.__orpvEditText() : null);")
+                .then(String.class, texte -> {
+                    if (texte != null) {
+                        ouvrirEditeur(texte);
+                    }
+                });
+    }
+
+    /**
+     * Fenêtre modale « Éditeur » : une grande zone de texte pré-remplie avec le
+     * contenu du champ courant. « OK » reporte le texte modifié dans le champ
+     * d'origine, « Annuler » referme sans rien changer et « Rechercher » sélectionne
+     * une occurrence de texte dans la zone d'édition.
+     */
+    private void ouvrirEditeur(String texte) {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Éditeur");
+        dialog.setDraggable(true);
+        dialog.setResizable(true);
+        dialog.addClassName("editeur-dialog");
+        dialog.setWidth("480px");
+        dialog.setHeight("320px");
+
+        TextArea zone = new TextArea();
+        zone.setValue(texte);
+        zone.setWidthFull();
+        zone.setHeight("100%");
+        zone.addThemeVariants(TextAreaVariant.LUMO_SMALL);
+        zone.focus();
+
+        VerticalLayout contenu = new VerticalLayout(zone);
+        contenu.setPadding(false);
+        contenu.setSpacing(false);
+        contenu.setSizeFull();
+        contenu.setFlexGrow(1, zone);
+        dialog.add(contenu);
+
+        Button okButton = new Button("OK", e -> {
+            getElement().executeJs("this.__orpvSetText && this.__orpvSetText($0)", zone.getValue());
+            dialog.close();
+        });
+        okButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+        okButton.addClassName("orpv-dialog-ok");
+
+        Button annulerButton = new Button("Annuler", e -> dialog.close());
+        annulerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        annulerButton.addClickShortcut(Key.ESCAPE);
+
+        Button rechercherButton = new Button("Rechercher", e -> ouvrirRechercheEditeur(zone));
+        rechercherButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+
+        dialog.getFooter().add(okButton, annulerButton, rechercherButton);
+        dialog.open();
+    }
+
+    /**
+     * Sous-fenêtre « Rechercher » de l'éditeur : saisie d'un texte à localiser. À
+     * la validation, la première occurrence trouvée dans la zone d'édition est
+     * sélectionnée ; sinon une notification signale l'échec.
+     */
+    private void ouvrirRechercheEditeur(TextArea zone) {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Rechercher");
+        dialog.setDraggable(true);
+
+        TextField terme = new TextField("Texte à rechercher");
+        terme.setWidthFull();
+        terme.focus();
+
+        VerticalLayout contenu = new VerticalLayout(terme);
+        contenu.setPadding(false);
+        contenu.setWidth("20em");
+        dialog.add(contenu);
+
+        Runnable rechercher = () -> {
+            zone.getElement().executeJs(
+                    "const i = this.shadowRoot ? this.shadowRoot.querySelector('textarea') : null;"
+                  + "const t = $0;"
+                  + "if (!i || !t) { return false; }"
+                  + "const idx = i.value.indexOf(t);"
+                  + "if (idx < 0) { return false; }"
+                  + "i.focus(); i.setSelectionRange(idx, idx + t.length); return true;",
+                    terme.getValue())
+                    .then(Boolean.class, trouve -> {
+                        if (!Boolean.TRUE.equals(trouve)) {
+                            Notification.show("Texte introuvable");
+                        }
+                    });
+            dialog.close();
+        };
+
+        Button okButton = new Button("OK", e -> rechercher.run());
+        okButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+        okButton.addClassName("orpv-dialog-ok");
+        okButton.addClickShortcut(Key.ENTER);
+
+        Button annulerButton = new Button("Annuler", e -> dialog.close());
+        annulerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        annulerButton.addClickShortcut(Key.ESCAPE);
+
+        dialog.getFooter().add(okButton, annulerButton);
+        dialog.open();
     }
 
     // ------------------------------------------------------------------

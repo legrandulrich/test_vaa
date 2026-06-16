@@ -625,7 +625,32 @@
 
 
 /* ====================================================================
-   12. IMPRESSION (@media print)
+   12. ÉDITEUR (fenêtre « Éditeur » des champs de saisie)
+   Fenêtre modale déclenchée par le bouton « Éditer » : une zone de texte
+   occupant toute la fenêtre, densité compacte cohérente avec le reste.
+   L'overlay du Dialog n'hérite pas des variables de .orpv-body.
+   ==================================================================== */
+.editeur-dialog {
+    --lumo-font-size-m: 13px;
+    --lumo-border-radius-m: 3px;
+    --vaadin-input-field-border-width: 1px;
+    --vaadin-input-field-border-color: var(--orpv-field-border);
+    --vaadin-input-field-background: #ffffff;
+}
+
+.editeur-dialog::part(content) {
+    padding: 8px 12px;
+}
+
+/* La zone de texte occupe toute la hauteur disponible de la fenêtre. */
+.editeur-dialog vaadin-text-area,
+.editeur-dialog vaadin-text-area::part(input-field) {
+    height: 100%;
+}
+
+
+/* ====================================================================
+   13. IMPRESSION (@media print)
    Le bouton « Imprimer » (Maj+F8) déclenche window.print(). À l'impression
    on ne veut que le corps du formulaire ORPV : on masque tout le cadre
    applicatif (en-tête, barre de menu, barre d'outils, barre d'état et
