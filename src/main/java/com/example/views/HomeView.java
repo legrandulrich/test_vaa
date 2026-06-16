@@ -58,6 +58,7 @@ public class HomeView extends Div {
     private static final String THEME_5 = "styles/themes/theme5.css";
     private static final String THEME_6 = "styles/themes/theme6.css";
     private static final String THEME_7 = "styles/themes/theme7.css";
+    private static final String THEME_8 = "styles/themes/theme8.css";
 
     /**
      * Applique un thème : échange la feuille de style « orpv-theme » du
@@ -170,9 +171,10 @@ public class HomeView extends Div {
 
     /**
      * Attache à l'élément « Aide » un menu déroulant contenant un sous-menu
-     * « Thème » : « Par défaut » (app.css seul) puis sept variantes de
+     * « Thème » : « Par défaut » (app.css seul) puis huit variantes de
      * présentation. Le thème choisi est appliqué immédiatement et mémorisé dans
-     * le navigateur (cf. {@link #appliquerTheme}). Les thèmes 2 et 7 sont sombres.
+     * le navigateur (cf. {@link #appliquerTheme}). Les thèmes 2 et 7 sont sombres ;
+     * le thème 8 (« Gris Forms ») est clair.
      */
     private void attacherMenuAide(Span cible) {
         ContextMenu menu = new ContextMenu(cible);
@@ -187,6 +189,7 @@ public class HomeView extends Div {
         themes.addItem("Thème 5", event -> appliquerTheme(THEME_5, false));
         themes.addItem("Thème 6", event -> appliquerTheme(THEME_6, false));
         themes.addItem("Thème 7", event -> appliquerTheme(THEME_7, true));
+        themes.addItem("Thème 8", event -> appliquerTheme(THEME_8, false));
     }
 
     /**

@@ -61,6 +61,18 @@
     --orpv-success: #36a84d;           /* fond des boutons « succès » (Continuer, OK) */
     --orpv-danger-text: #ffffff;       /* texte des boutons « danger » */
     --orpv-success-text: #ffffff;      /* texte des boutons « succès » */
+
+    /* Barre d'outils (les 14 boutons-icônes) — suit automatiquement le thème :
+       par défaut, elle reprend les tons de la barre d'état (sa bande jumelle).
+       Un thème peut toujours surcharger ces tokens pour un rendu sur mesure. */
+    --orpv-toolbar-bg: var(--orpv-statusbar-bg);
+    --orpv-toolbar-border: var(--orpv-statusbar-border);
+    --orpv-toolbar-highlight: rgba(255, 255, 255, 0.45);  /* liseré clair (haut de barre + séparateurs) */
+    --orpv-toolbar-sep: var(--orpv-statusbar-border);     /* trait des séparateurs */
+    --orpv-tool-hover-border: #8aa6d4;     /* survol d'un bouton-icône */
+    --orpv-tool-hover-bg: #eaf1fb;
+    --orpv-tool-active-border: #6f8fc4;    /* bouton-icône enfoncé */
+    --orpv-tool-active-bg: #d7e2f4;
 }
 
 
@@ -383,10 +395,10 @@
     flex-wrap: wrap;
     gap: 1px;
     padding: 3px 5px;
-    background: linear-gradient(180deg, #f3f1ea 0%, #dcd7ca 100%);
-    border: 1px solid #b7b1a3;
+    background: var(--orpv-toolbar-bg);
+    border: 1px solid var(--orpv-toolbar-border);
     border-radius: 3px;
-    box-shadow: inset 0 1px 0 #fffdf8;
+    box-shadow: inset 0 1px 0 var(--orpv-toolbar-highlight);
 }
 
 .orpv-tool-button {
@@ -401,13 +413,13 @@
 }
 
 .orpv-tool-button:hover {
-    border-color: #8aa6d4;
-    background: #eaf1fb;
+    border-color: var(--orpv-tool-hover-border);
+    background: var(--orpv-tool-hover-bg);
 }
 
 .orpv-tool-button:active {
-    border-color: #6f8fc4;
-    background: #d7e2f4;
+    border-color: var(--orpv-tool-active-border);
+    background: var(--orpv-tool-active-bg);
 }
 
 /* Icône SVG (servie depuis /icons) : taille fixe, couleurs d'origine. */
@@ -422,8 +434,8 @@
     width: 1px;
     height: 22px;
     margin: 0 5px;
-    background: #b0a99c;
-    box-shadow: 1px 0 0 #fffdf8;
+    background: var(--orpv-toolbar-sep);
+    box-shadow: 1px 0 0 var(--orpv-toolbar-highlight);
 }
 
 /* Petit bouton de recherche (loupe / liste) à droite des champs code */

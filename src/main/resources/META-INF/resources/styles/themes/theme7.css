@@ -76,21 +76,16 @@
     --vaadin-input-field-border-color: #36595f;
 }
 
-/* Barre d'outils (14 boutons) : dégradé clair d'origine remplacé par du sombre. */
-.orpv-body .orpv-toolbar {
-    background: linear-gradient(180deg, #1a3438 0%, #142a2e 100%);
-    border-color: #2c4d52;
-    box-shadow: inset 0 1px 0 #224045;
-}
-
-.orpv-tool-button:hover {
-    border-color: #44757c;
-    background: #1e3c41;
-}
-
-.orpv-tool-button:active {
-    border-color: #569299;
-    background: #25484e;
+/* Barre d'outils (14 boutons) : tons sombres assortis, via les tokens. */
+:root {
+    --orpv-toolbar-bg: linear-gradient(180deg, #1a3438 0%, #142a2e 100%);
+    --orpv-toolbar-border: #2c4d52;
+    --orpv-toolbar-highlight: #224045;
+    --orpv-toolbar-sep: #2c4d52;
+    --orpv-tool-hover-border: #44757c;
+    --orpv-tool-hover-bg: #1e3c41;
+    --orpv-tool-active-border: #569299;
+    --orpv-tool-active-bg: #25484e;
 }
 
 /* Carte de connexion (fond blanc codé en dur). */
