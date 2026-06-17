@@ -24,19 +24,17 @@ public class MainLayout extends VerticalLayout implements RouterLayout {
      * Réapplique le thème mémorisé dans le navigateur (localStorage), choisi via
      * Aide ▸ Thème. Exécuté à chaque attachement de la mise en page racine, ce
      * qui couvre le rechargement complet de n'importe quelle vue. Sans choix
-     * mémorisé, le thème par défaut de app.css reste en place.
+     * mémorisé, le thème 9 — thème par défaut de l'application — est appliqué.
      */
     private static final String JS_RESTAURER_THEME =
-            "const href = window.localStorage.getItem('orpv-theme-href');"
-          + "if (href) {"
-          + "  let lien = document.getElementById('orpv-theme');"
-          + "  if (!lien) { lien = document.createElement('link'); lien.id = 'orpv-theme';"
-          + "    lien.rel = 'stylesheet'; document.head.appendChild(lien); }"
-          + "  if (lien.getAttribute('href') !== href) { lien.setAttribute('href', href); }"
-          + "  if (window.localStorage.getItem('orpv-theme-dark') === 'true') {"
-          + "    document.documentElement.setAttribute('theme', 'dark'); }"
-          + "  else { document.documentElement.removeAttribute('theme'); }"
-          + "}";
+            "const href = window.localStorage.getItem('orpv-theme-href') || 'styles/themes/theme9.css';"
+          + "let lien = document.getElementById('orpv-theme');"
+          + "if (!lien) { lien = document.createElement('link'); lien.id = 'orpv-theme';"
+          + "  lien.rel = 'stylesheet'; document.head.appendChild(lien); }"
+          + "if (lien.getAttribute('href') !== href) { lien.setAttribute('href', href); }"
+          + "if (window.localStorage.getItem('orpv-theme-dark') === 'true') {"
+          + "  document.documentElement.setAttribute('theme', 'dark'); }"
+          + "else { document.documentElement.removeAttribute('theme'); }";
 
     private final Div contenu = new Div();
     private final StatusBar statusBar = new StatusBar();

@@ -1,52 +1,53 @@
 /* ====================================================================
-   theme1.css — Thème « Ardoise » (corporate, clair)
+   theme1.css — Thème « Gris #BFC6C4 » (monochrome, clair)
 
-   Variante de présentation de SIRUL. Surcharge UNIQUEMENT les tokens
-   de palette définis dans app.css (:root) ; toute la structure reste
-   portée par app.css. Cette feuille est attachée dynamiquement par-dessus
-   app.css (donc elle l'emporte sur les valeurs par défaut).
+   Échangé avec l'ancien thème 1 (« Ardoise »), désormais en theme9.css.
+   Tout en gris clair légèrement vert (#BFC6C4) : surfaces, barre de menu,
+   en-tête et barre d'état ; texte foncé pour le contraste ; champs blancs.
+   La barre d'outils suit automatiquement (elle dérive de la barre d'état).
 
-   Identité : bleu ardoise profond et contrasté, façon application de
-   gestion d'entreprise. Surfaces fraîches, en-tête marine soutenu.
+   Surcharge UNIQUEMENT les tokens de palette définis dans app.css
+   (:root) ; toute la structure reste portée par app.css. Cette feuille
+   est attachée dynamiquement par-dessus app.css (donc elle l'emporte).
    ==================================================================== */
 :root {
-    /* Surfaces */
-    --orpv-app-bg: #aeb9c7;
-    --orpv-panel-bg: #eceff3;
-    --orpv-panel-border: #7c8799;
-    --orpv-panel-shadow: 0 6px 20px rgba(13, 26, 48, 0.28);
+    /* Surfaces — gris #BFC6C4 sur canevas un peu plus foncé. */
+    --orpv-app-bg: #a8b0ae;
+    --orpv-panel-bg: #bfc6c4;
+    --orpv-panel-border: #8a928f;
+    --orpv-panel-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
 
     /* Champs et boutons */
-    --orpv-field-border: #98a2b1;
-    --orpv-lookup-bg: #dde2e9;
-    --orpv-lookup-color: #3c4757;
+    --orpv-field-border: #8a928f;
+    --orpv-lookup-bg: #b3bbb8;
+    --orpv-lookup-color: #2c322f;
 
     /* Onglets internes */
-    --orpv-inner-tabs-bg: #f1f3f6;
-    --orpv-inner-tabs-border: #bcc4d0;
+    --orpv-inner-tabs-bg: #c6ccca;
+    --orpv-inner-tabs-border: #a3aba8;
 
-    /* Texte */
-    --orpv-text: #1c2530;
-    --orpv-text-muted: #5e6877;
+    /* Texte — foncé pour rester lisible sur le gris clair. */
+    --orpv-text: #1e2422;
+    --orpv-text-muted: #515855;
 
-    /* Barre de menu + onglets fermables */
-    --orpv-menubar-bg: linear-gradient(180deg, #34507f 0%, #182c4c 100%);
-    --orpv-menu-color: #e9eef7;
-    --orpv-tab-close-color: #828c99;
-    --orpv-tab-close-hover: #c0392b;
+    /* Barre de menu + onglets fermables — gris bevelé, texte foncé. */
+    --orpv-menubar-bg: linear-gradient(180deg, #c9cfcd 0%, #aeb5b3 100%);
+    --orpv-menu-color: #1e2422;
+    --orpv-tab-close-color: #636a67;
+    --orpv-tab-close-hover: #b23a3a;
 
     /* En-tête de l'accueil */
-    --orpv-header-bg: #ffffff;
-    --orpv-header-border: #aeb6c2;
+    --orpv-header-bg: #c6cdcb;
+    --orpv-header-border: #9aa19e;
 
-    /* Barre d'état */
-    --orpv-statusbar-bg: #dee2e9;
-    --orpv-statusbar-border: #b3bcc8;
-    --orpv-statusbar-text: #34404d;
+    /* Barre d'état (la barre d'outils en hérite automatiquement). */
+    --orpv-statusbar-bg: #b4bbb9;
+    --orpv-statusbar-border: #969d9a;
+    --orpv-statusbar-text: #232927;
 
-    /* Actions */
-    --orpv-danger: #cf3b3b;
-    --orpv-success: #2f9e4a;
-    --orpv-danger-text: #fdf3f3;
-    --orpv-success-text: #f1faf3;
+    /* Actions — boutons gris uniformes (Quitter, Continuer, OK). */
+    --orpv-danger: #8f9794;
+    --orpv-success: #8f9794;
+    --orpv-danger-text: #1e2422;
+    --orpv-success-text: #1e2422;
 }

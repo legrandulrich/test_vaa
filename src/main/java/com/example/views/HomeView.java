@@ -49,16 +49,17 @@ public class HomeView extends Div {
     private static final String TITRE_GESTION_UNITES =
             "Système de la recherche - Gestion des organismes pourvoyeurs";
 
-    /** Feuilles de style des trois thèmes proposés (sous Aide ▸ Thème).
-     *  Chemins relatifs à la racine, servis comme app.css (META-INF/resources). */
+    /** Feuilles de style des thèmes proposés (sous Aide ▸ Thème). Le thème 9 est
+     *  le thème par défaut, appliqué au chargement (cf. MainLayout) à défaut de
+     *  choix mémorisé. Chemins relatifs à la racine (servis depuis META-INF/resources). */
     private static final String THEME_1 = "styles/themes/theme1.css";
-    private static final String THEME_2 = "styles/themes/theme2.css";
     private static final String THEME_3 = "styles/themes/theme3.css";
     private static final String THEME_4 = "styles/themes/theme4.css";
     private static final String THEME_5 = "styles/themes/theme5.css";
     private static final String THEME_6 = "styles/themes/theme6.css";
-    private static final String THEME_7 = "styles/themes/theme7.css";
     private static final String THEME_8 = "styles/themes/theme8.css";
+    private static final String THEME_9 = "styles/themes/theme9.css";
+    private static final String THEME_10 = "styles/themes/theme10.css";
 
     /**
      * Applique un thème : échange la feuille de style « orpv-theme » du
@@ -76,18 +77,6 @@ public class HomeView extends Div {
           + "else { document.documentElement.removeAttribute('theme'); }"
           + "window.localStorage.setItem('orpv-theme-href', $0);"
           + "window.localStorage.setItem('orpv-theme-dark', $1 ? 'true' : 'false');";
-
-    /**
-     * Rétablit l'apparence par défaut (app.css seul) : retire la feuille de
-     * thème et le mode sombre, et efface le choix mémorisé pour qu'aucun thème
-     * ne soit réappliqué aux visites suivantes.
-     */
-    private static final String JS_REINITIALISER_THEME =
-            "const lien = document.getElementById('orpv-theme');"
-          + "if (lien) { lien.remove(); }"
-          + "document.documentElement.removeAttribute('theme');"
-          + "window.localStorage.removeItem('orpv-theme-href');"
-          + "window.localStorage.removeItem('orpv-theme-dark');";
 
     /** Zone centrale accueillant les onglets fermables. */
     private final TabSheet zoneOnglets = new TabSheet();
@@ -171,25 +160,24 @@ public class HomeView extends Div {
 
     /**
      * Attache à l'élément « Aide » un menu déroulant contenant un sous-menu
-     * « Thème » : « Par défaut » (app.css seul) puis huit variantes de
-     * présentation. Le thème choisi est appliqué immédiatement et mémorisé dans
-     * le navigateur (cf. {@link #appliquerTheme}). Les thèmes 2 et 7 sont sombres ;
-     * le thème 8 (« Gris Forms ») est clair.
+     * « Thème » : les variantes de présentation (1, 3, 4, 5, 6, 8, 9 et 10),
+     * toutes claires, le thème 9 étant le défaut appliqué au chargement. Le thème choisi
+     * est appliqué immédiatement et mémorisé dans le navigateur
+     * (cf. {@link #appliquerTheme}).
      */
     private void attacherMenuAide(Span cible) {
         ContextMenu menu = new ContextMenu(cible);
         menu.setOpenOnClick(true);
 
         SubMenu themes = menu.addItem("Thème").getSubMenu();
-        themes.addItem("Par défaut", event -> reinitialiserTheme());
         themes.addItem("Thème 1", event -> appliquerTheme(THEME_1, false));
-        themes.addItem("Thème 2", event -> appliquerTheme(THEME_2, true));
         themes.addItem("Thème 3", event -> appliquerTheme(THEME_3, false));
         themes.addItem("Thème 4", event -> appliquerTheme(THEME_4, false));
         themes.addItem("Thème 5", event -> appliquerTheme(THEME_5, false));
         themes.addItem("Thème 6", event -> appliquerTheme(THEME_6, false));
-        themes.addItem("Thème 7", event -> appliquerTheme(THEME_7, true));
         themes.addItem("Thème 8", event -> appliquerTheme(THEME_8, false));
+        themes.addItem("Thème 9", event -> appliquerTheme(THEME_9, false));
+        themes.addItem("Thème 10", event -> appliquerTheme(THEME_10, false));
     }
 
     /**
@@ -201,11 +189,6 @@ public class HomeView extends Div {
     private void appliquerTheme(String fichierCss, boolean sombre) {
         getUI().ifPresent(ui ->
                 ui.getPage().executeJs(JS_APPLIQUER_THEME, fichierCss, sombre));
-    }
-
-    /** Rétablit l'apparence par défaut (app.css seul) et oublie le choix mémorisé. */
-    private void reinitialiserTheme() {
-        getUI().ifPresent(ui -> ui.getPage().executeJs(JS_REINITIALISER_THEME));
     }
 
     /** Corps de l'accueil : contient le contenu par défaut, puis les onglets. */

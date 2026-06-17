@@ -1,0 +1,53 @@
+/* ====================================================================
+   theme10.css — Thème « Gris #CBCBCB » (monochrome, clair)
+
+   Variante demandée par le client : tout en gris neutre clair (#CBCBCB).
+   Surfaces, barre de menu, en-tête et barre d'état dans ce gris ; texte
+   foncé pour le contraste ; champs blancs (zones de saisie). La barre
+   d'outils suit automatiquement (elle dérive de la barre d'état).
+
+   Surcharge UNIQUEMENT les tokens de palette définis dans app.css
+   (:root) ; toute la structure reste portée par app.css. Cette feuille
+   est attachée dynamiquement par-dessus app.css (donc elle l'emporte).
+   ==================================================================== */
+:root {
+    /* Surfaces — gris #CBCBCB sur canevas un peu plus foncé. */
+    --orpv-app-bg: #b4b4b4;
+    --orpv-panel-bg: #cbcbcb;
+    --orpv-panel-border: #949494;
+    --orpv-panel-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+
+    /* Champs et boutons */
+    --orpv-field-border: #949494;
+    --orpv-lookup-bg: #bdbdbd;
+    --orpv-lookup-color: #2e2e2e;
+
+    /* Onglets internes */
+    --orpv-inner-tabs-bg: #d0d0d0;
+    --orpv-inner-tabs-border: #aaaaaa;
+
+    /* Texte — foncé pour rester lisible sur le gris clair. */
+    --orpv-text: #1f1f1f;
+    --orpv-text-muted: #545454;
+
+    /* Barre de menu + onglets fermables — gris bevelé, texte foncé. */
+    --orpv-menubar-bg: linear-gradient(180deg, #d3d3d3 0%, #bcbcbc 100%);
+    --orpv-menu-color: #1f1f1f;
+    --orpv-tab-close-color: #6a6a6a;
+    --orpv-tab-close-hover: #b23a3a;
+
+    /* En-tête de l'accueil */
+    --orpv-header-bg: #d0d0d0;
+    --orpv-header-border: #a0a0a0;
+
+    /* Barre d'état (la barre d'outils en hérite automatiquement). */
+    --orpv-statusbar-bg: #bfbfbf;
+    --orpv-statusbar-border: #9a9a9a;
+    --orpv-statusbar-text: #232323;
+
+    /* Actions — boutons gris uniformes (Quitter, Continuer, OK). */
+    --orpv-danger: #969696;
+    --orpv-success: #969696;
+    --orpv-danger-text: #1f1f1f;
+    --orpv-success-text: #1f1f1f;
+}
