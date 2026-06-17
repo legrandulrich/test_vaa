@@ -1,7 +1,6 @@
 package com.example.views.shared;
 
 import com.example.views.AcceuilView;
-import com.example.views.MainLayout;
 import com.vaadin.flow.component.html.Div;
 
 /**

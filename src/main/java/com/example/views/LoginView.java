@@ -1,5 +1,7 @@
 package com.example.views;
 
+import com.example.views.shared.AppHeader;
+import com.example.views.shared.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;

@@ -1,5 +1,7 @@
-package com.example.views;
+package com.example.views.shared;
 
+import com.example.views.AcceuilView;
+import com.example.views.HomeView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;

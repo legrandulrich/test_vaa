@@ -1,4 +1,4 @@
-package com.example.views;
+package com.example.views.shared;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;

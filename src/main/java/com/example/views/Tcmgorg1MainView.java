@@ -33,6 +33,7 @@ import com.example.util.MotifRecherche;
 import com.example.util.OrganismePourvoyeur;
 import com.example.util.OrganismesPourvoyeurs;
 import com.example.views.shared.BarreOutils;
+import com.example.views.shared.MainLayout;
 import com.example.views.shared.VueFormulaire;
 
 import static com.example.views.shared.Champs.appliquerResultats;

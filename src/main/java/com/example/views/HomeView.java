@@ -19,7 +19,8 @@ import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-
+import com.example.views.shared.AppHeader;
+import com.example.views.shared.MainLayout;
 import com.example.views.shared.VueFormulaire;
 
 import org.springframework.beans.factory.config.BeanDefinition;

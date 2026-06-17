@@ -22,6 +22,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 
 import com.example.views.shared.BarreOutils;
+import com.example.views.shared.MainLayout;
 import com.example.views.shared.VueFormulaire;
 
 import static com.example.views.shared.Champs.champTexte;

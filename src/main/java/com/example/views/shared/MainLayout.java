@@ -1,4 +1,4 @@
-package com.example.views;
+package com.example.views.shared;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
