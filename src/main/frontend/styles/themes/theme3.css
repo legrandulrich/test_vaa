@@ -5,7 +5,7 @@
    accent azur. Look moderne et reposant, lisibilité maximale. Surcharge
    uniquement les tokens de palette de app.css.
    ==================================================================== */
-:root {
+html[theme~="bleu-azur"] {
     /* Surfaces */
     --orpv-app-bg: #eef3f8;
     --orpv-panel-bg: #ffffff;

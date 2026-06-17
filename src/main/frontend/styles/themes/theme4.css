@@ -6,7 +6,7 @@
    Évoque les registres reliés de cuir vert des bibliothèques. Surcharge
    uniquement les tokens de palette de app.css.
    ==================================================================== */
-:root {
+html[theme~="vert-emeraude"] {
     /* Surfaces */
     --orpv-app-bg: #ccdbd2;
     --orpv-panel-bg: #f2f6f1;

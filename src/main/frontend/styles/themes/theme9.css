@@ -9,7 +9,7 @@
    (:root) ; toute la structure reste portée par app.css. Cette feuille
    est attachée dynamiquement par-dessus app.css (donc elle l'emporte).
    ==================================================================== */
-:root {
+html[theme~="bleu-ardoise"] {
     /* Surfaces */
     --orpv-app-bg: #aeb9c7;
     --orpv-panel-bg: #eceff3;

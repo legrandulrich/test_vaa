@@ -6,7 +6,7 @@
    distinctif, façon papeterie de luxe. Surcharge uniquement les tokens
    de palette de app.css.
    ==================================================================== */
-:root {
+html[theme~="violet-amethyste"] {
     /* Surfaces */
     --orpv-app-bg: #d8d2e2;
     --orpv-panel-bg: #f7f5fa;

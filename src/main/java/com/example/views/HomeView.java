@@ -47,33 +47,16 @@ public class HomeView extends Div {
     private static final String TITRE_GESTION_UNITES =
             "Système de la recherche - Gestion des organismes pourvoyeurs";
 
-    /** Feuilles de style des thèmes proposés (sous Aide ▸ Thème). Le thème 9 est
-     *  le thème par défaut, appliqué au chargement (cf. MainLayout) à défaut de
-     *  choix mémorisé. Chemins relatifs à la racine (servis depuis META-INF/resources). */
-    private static final String THEME_1 = "styles/themes/theme1.css";
-    private static final String THEME_3 = "styles/themes/theme3.css";
-    private static final String THEME_4 = "styles/themes/theme4.css";
-    private static final String THEME_5 = "styles/themes/theme5.css";
-    private static final String THEME_6 = "styles/themes/theme6.css";
-    private static final String THEME_9 = "styles/themes/theme9.css";
-    private static final String THEME_10 = "styles/themes/theme10.css";
-
     /**
-     * Applique un thème : échange la feuille de style « orpv-theme » du
-     * document, bascule (ou retire) le mode sombre de Lumo, puis mémorise le
-     * choix dans le navigateur (localStorage) afin de le réappliquer lors des
-     * visites suivantes — jusqu'à ce que l'utilisateur en choisisse un autre.
-     * Paramètres : $0 = href de la feuille, $1 = mode sombre (booléen).
+     * Applique un thème : positionne l'attribut {@code theme} sur l'élément racine
+     * du document. Chaque thème est une variante {@code html[theme~="..."]}
+     * empaquetée depuis src/main/frontend/styles/themes/. Le choix est mémorisé
+     * dans le navigateur (localStorage) pour être réappliqué aux visites suivantes.
+     * Paramètre : $0 = nom (slug) du thème.
      */
     private static final String JS_APPLIQUER_THEME =
-            "let lien = document.getElementById('orpv-theme');"
-          + "if (!lien) { lien = document.createElement('link'); lien.id = 'orpv-theme';"
-          + "  lien.rel = 'stylesheet'; document.head.appendChild(lien); }"
-          + "if (lien.getAttribute('href') !== $0) { lien.setAttribute('href', $0); }"
-          + "if ($1) { document.documentElement.setAttribute('theme', 'dark'); }"
-          + "else { document.documentElement.removeAttribute('theme'); }"
-          + "window.localStorage.setItem('orpv-theme-href', $0);"
-          + "window.localStorage.setItem('orpv-theme-dark', $1 ? 'true' : 'false');";
+            "document.documentElement.setAttribute('theme', $0);"
+          + "window.localStorage.setItem('orpv-theme', $0);";
 
     /** Zone centrale accueillant les onglets fermables. */
     private final TabSheet zoneOnglets = new TabSheet();
@@ -210,24 +193,23 @@ public class HomeView extends Div {
         menu.setOpenOnClick(true);
 
         SubMenu themes = menu.addItem("Thème").getSubMenu();
-        themes.addItem("Gris vert", event -> appliquerTheme(THEME_1, false));
-        themes.addItem("Bleu azur", event -> appliquerTheme(THEME_3, false));
-        themes.addItem("Vert émeraude", event -> appliquerTheme(THEME_4, false));
-        themes.addItem("Terracotta", event -> appliquerTheme(THEME_5, false));
-        themes.addItem("Violet améthyste", event -> appliquerTheme(THEME_6, false));
-        themes.addItem("Bleu ardoise", event -> appliquerTheme(THEME_9, false));
-        themes.addItem("Gris", event -> appliquerTheme(THEME_10, false));
+        themes.addItem("Gris vert", event -> appliquerTheme("gris-vert"));
+        themes.addItem("Bleu azur", event -> appliquerTheme("bleu-azur"));
+        themes.addItem("Vert émeraude", event -> appliquerTheme("vert-emeraude"));
+        themes.addItem("Terracotta", event -> appliquerTheme("terracotta"));
+        themes.addItem("Violet améthyste", event -> appliquerTheme("violet-amethyste"));
+        themes.addItem("Bleu ardoise", event -> appliquerTheme("bleu-ardoise"));
+        themes.addItem("Gris", event -> appliquerTheme("gris"));
     }
 
     /**
-     * Applique la feuille de thème indiquée et la mémorise dans le navigateur.
+     * Applique le thème indiqué (variante d'attribut) et le mémorise dans le
+     * navigateur.
      *
-     * @param fichierCss chemin de la feuille de thème à attacher
-     * @param sombre     {@code true} pour activer aussi le mode sombre de Lumo
+     * @param slug nom du thème, p. ex. « bleu-ardoise » (cf. {@code html[theme~="..."]})
      */
-    private void appliquerTheme(String fichierCss, boolean sombre) {
-        getUI().ifPresent(ui ->
-                ui.getPage().executeJs(JS_APPLIQUER_THEME, fichierCss, sombre));
+    private void appliquerTheme(String slug) {
+        getUI().ifPresent(ui -> ui.getPage().executeJs(JS_APPLIQUER_THEME, slug));
     }
 
     /** Corps de l'accueil : contient le contenu par défaut, puis les onglets. */

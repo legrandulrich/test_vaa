@@ -10,7 +10,7 @@
    (:root) ; toute la structure reste portée par app.css. Cette feuille
    est attachée dynamiquement par-dessus app.css (donc elle l'emporte).
    ==================================================================== */
-:root {
+html[theme~="gris-vert"] {
     /* Surfaces — gris #BFC6C4 sur canevas un peu plus foncé. */
     --orpv-app-bg: #a8b0ae;
     --orpv-panel-bg: #bfc6c4;

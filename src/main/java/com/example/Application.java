@@ -9,10 +9,17 @@ import com.vaadin.flow.component.page.AppShellConfigurator;
 
 @SpringBootApplication
 @StyleSheet(Aura.STYLESHEET)
-// Styles de base servis depuis le dossier frontend (src/main/frontend/styles/app.css),
-// empaquetés par le build. Les thèmes commutables restent en ressources statiques
-// (chargés par URL au runtime, cf. HomeView/MainLayout).
+// Styles empaquetés par le build depuis src/main/frontend/styles/. app.css porte
+// la structure et les valeurs par défaut ; chaque thème est une variante d'attribut
+// (html[theme~="..."]) activée via l'attribut « theme » (cf. HomeView/MainLayout).
 @CssImport("./styles/app.css")
+@CssImport("./styles/themes/theme1.css")
+@CssImport("./styles/themes/theme3.css")
+@CssImport("./styles/themes/theme4.css")
+@CssImport("./styles/themes/theme5.css")
+@CssImport("./styles/themes/theme6.css")
+@CssImport("./styles/themes/theme9.css")
+@CssImport("./styles/themes/theme10.css")
 public class Application implements AppShellConfigurator {
 
     public static void main(String[] args) {

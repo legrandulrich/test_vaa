@@ -6,7 +6,7 @@
    loin des bleus administratifs habituels. Surcharge uniquement les
    tokens de palette de app.css.
    ==================================================================== */
-:root {
+html[theme~="terracotta"] {
     /* Surfaces */
     --orpv-app-bg: #e3d4c3;
     --orpv-panel-bg: #faf4ea;
