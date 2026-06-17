@@ -6,7 +6,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.SubMenu;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -40,7 +39,6 @@ import java.util.Map;
  */
 @Route(value = "home", layout = MainLayout.class)
 @PageTitle("Menu | SIRUL")
-@StyleSheet("styles/app.css")
 @SpringComponent
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class HomeView extends Div {
@@ -57,7 +55,6 @@ public class HomeView extends Div {
     private static final String THEME_4 = "styles/themes/theme4.css";
     private static final String THEME_5 = "styles/themes/theme5.css";
     private static final String THEME_6 = "styles/themes/theme6.css";
-    private static final String THEME_8 = "styles/themes/theme8.css";
     private static final String THEME_9 = "styles/themes/theme9.css";
     private static final String THEME_10 = "styles/themes/theme10.css";
 
@@ -104,6 +101,9 @@ public class HomeView extends Div {
 
     /** Barre de menu sombre de l'en-tête. */
     private Div creerBarreMenu() {
+        Span fichierItem = elementMenu("Fichier");
+        attacherMenuFichier(fichierItem);
+
         Span gestionUnitesItem = elementMenu("Gestion des unités");
         gestionUnitesItem.addClickListener(event ->
                 ouvrirOnglet(TITRE_GESTION_UNITES, new Tcmgorg1MainView()));
@@ -115,7 +115,7 @@ public class HomeView extends Div {
         attacherMenuAide(aideItem);
 
         Div barre = new Div(
-                elementMenu("Fichier"),
+                fichierItem,
                 elementMenu("Projet"),
                 elementMenu("Chercheur"),
                 elementMenu("Grp. recherche"),
@@ -125,6 +125,45 @@ public class HomeView extends Div {
                 aideItem);
         barre.addClassName("orpv-menubar");
         return barre;
+    }
+
+    /**
+     * Attache à l'élément « Fichier » un menu déroulant (ouverture au clic)
+     * contenant l'entrée « Quitter », qui ferme l'onglet de l'application dans
+     * le navigateur.
+     */
+    private void attacherMenuFichier(Span cible) {
+        ContextMenu menu = new ContextMenu(cible);
+        menu.setOpenOnClick(true);
+        menu.addItem("Quitter", event -> fermerOngletNavigateur());
+    }
+
+    /**
+     * Script de « Quitter » : tente d'abord de fermer l'onglet
+     * ({@code window.close()}, efficace seulement pour un onglet ouvert par
+     * script) ; si le navigateur le refuse, la page est remplacée par un écran de
+     * fin invitant l'utilisateur à fermer l'onglet lui-même. Le fond reprend le
+     * gris du thème par défaut.
+     */
+    private static final String JS_QUITTER = """
+            try { window.close(); } catch (e) {}
+            document.open();
+            document.write('<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">'
+              + '<title>Session terminée</title></head>'
+              + '<body style="margin:0;height:100vh;display:flex;align-items:center;justify-content:center;font-family:Segoe UI,Roboto,Arial,sans-serif;background:#bfc6c4;color:#1e2422;">'
+              + '<div style="text-align:center;padding:32px 40px;background:#eceff3;border:1px solid #8a928f;border-radius:6px;box-shadow:0 6px 20px rgba(0,0,0,.25);">'
+              + '<h1 style="margin:0 0 10px;font-size:20px;font-weight:600;">Application fermée</h1>'
+              + '<p style="margin:0;font-size:14px;color:#515855;">Vous pouvez fermer cet onglet du navigateur.</p>'
+              + '</div></body></html>');
+            document.close();
+            """;
+
+    /**
+     * « Quitter » : ferme l'onglet du navigateur, ou — si le navigateur refuse de
+     * fermer un onglet non ouvert par script — affiche un écran de fin.
+     */
+    private void fermerOngletNavigateur() {
+        getUI().ifPresent(ui -> ui.getPage().executeJs(JS_QUITTER));
     }
 
     /**
@@ -160,24 +199,24 @@ public class HomeView extends Div {
 
     /**
      * Attache à l'élément « Aide » un menu déroulant contenant un sous-menu
-     * « Thème » : les variantes de présentation (1, 3, 4, 5, 6, 8, 9 et 10),
-     * toutes claires, le thème 9 étant le défaut appliqué au chargement. Le thème choisi
-     * est appliqué immédiatement et mémorisé dans le navigateur
-     * (cf. {@link #appliquerTheme}).
+     * « Thème » : les variantes de présentation nommées d'après leur couleur
+     * dominante (Gris vert, Bleu azur, Vert émeraude, Terracotta, Violet
+     * améthyste, Bleu ardoise, Gris), toutes claires. « Bleu ardoise » est le
+     * thème par défaut appliqué au chargement. Le thème choisi est appliqué
+     * immédiatement et mémorisé dans le navigateur (cf. {@link #appliquerTheme}).
      */
     private void attacherMenuAide(Span cible) {
         ContextMenu menu = new ContextMenu(cible);
         menu.setOpenOnClick(true);
 
         SubMenu themes = menu.addItem("Thème").getSubMenu();
-        themes.addItem("Thème 1", event -> appliquerTheme(THEME_1, false));
-        themes.addItem("Thème 3", event -> appliquerTheme(THEME_3, false));
-        themes.addItem("Thème 4", event -> appliquerTheme(THEME_4, false));
-        themes.addItem("Thème 5", event -> appliquerTheme(THEME_5, false));
-        themes.addItem("Thème 6", event -> appliquerTheme(THEME_6, false));
-        themes.addItem("Thème 8", event -> appliquerTheme(THEME_8, false));
-        themes.addItem("Thème 9", event -> appliquerTheme(THEME_9, false));
-        themes.addItem("Thème 10", event -> appliquerTheme(THEME_10, false));
+        themes.addItem("Gris vert", event -> appliquerTheme(THEME_1, false));
+        themes.addItem("Bleu azur", event -> appliquerTheme(THEME_3, false));
+        themes.addItem("Vert émeraude", event -> appliquerTheme(THEME_4, false));
+        themes.addItem("Terracotta", event -> appliquerTheme(THEME_5, false));
+        themes.addItem("Violet améthyste", event -> appliquerTheme(THEME_6, false));
+        themes.addItem("Bleu ardoise", event -> appliquerTheme(THEME_9, false));
+        themes.addItem("Gris", event -> appliquerTheme(THEME_10, false));
     }
 
     /**

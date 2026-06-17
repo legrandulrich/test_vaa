@@ -8,7 +8,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
@@ -55,7 +54,6 @@ import java.util.stream.Collectors;
  */
 @Route(value = "organismes-pourvoyeurs", layout = MainLayout.class)
 @PageTitle("Gestion des organismes pourvoyeurs")
-@StyleSheet("styles/app.css")
 @SpringComponent
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class Tcmgorg1MainView extends Div {

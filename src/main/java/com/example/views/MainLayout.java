@@ -3,7 +3,6 @@ package com.example.views;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLayout;
@@ -17,7 +16,6 @@ import java.util.Optional;
  * <p>L'instance est conservée d'une navigation à l'autre, de sorte que la
  * barre d'état persiste ; chaque vue met à jour son message à l'attachement.</p>
  */
-@StyleSheet("styles/app.css")
 public class MainLayout extends VerticalLayout implements RouterLayout {
 
     /**

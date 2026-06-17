@@ -5,7 +5,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -29,7 +28,6 @@ import org.springframework.context.annotation.Scope;
  */
 @Route(value = "login", layout = MainLayout.class)
 @PageTitle("Connexion | SIRUL")
-@StyleSheet("styles/app.css")
 @SpringComponent
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class LoginView extends Div {
