@@ -1,15 +1,12 @@
 package com.example.views.shared;
 
-import com.example.views.AcceuilView;
-import com.example.views.HomeView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 
 /**
  * En-tête applicatif commun : barre blanche pleine largeur affichant le logo
- * de l'Université Laval et l'intitulé du vice-rectorat. Réutilisé par
- * {@link AcceuilView} et {@link HomeView}.
+ * de l'Université Laval et l'intitulé du vice-rectorat.
  */
 public class AppHeader extends Div {
 
