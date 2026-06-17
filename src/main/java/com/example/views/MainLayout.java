@@ -69,7 +69,7 @@ public class MainLayout extends VerticalLayout implements RouterLayout {
      * Recherche le {@link MainLayout} ancêtre d'un composant, pour permettre
      * à une vue de mettre à jour la barre d'état (à appeler une fois attachée).
      */
-    static Optional<MainLayout> rechercher(Component composant) {
+    public static Optional<MainLayout> rechercher(Component composant) {
         Component courant = composant;
         while (courant != null) {
             if (courant instanceof MainLayout) {

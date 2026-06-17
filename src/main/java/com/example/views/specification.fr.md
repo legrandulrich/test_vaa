@@ -29,7 +29,7 @@
 10. [Grille éditable (bloc multi-enregistrements)](#10-grille-éditable-bloc-multi-enregistrements)
 11. [Fenêtres modales (Dialog)](#11-fenêtres-modales-dialog)
 12. [Icônes SVG](#12-icônes-svg)
-13. [CSS / thème](#13-css--thème)
+13. [CSS, thème et système de thèmes](#13-css-thème-et-système-de-thèmes)
 14. [Données simulées (mock)](#14-données-simulées-mock)
 15. [Lecture seule vs désactivé](#15-lecture-seule-vs-désactivé)
 16. [Raccourcis clavier](#16-raccourcis-clavier)
@@ -56,25 +56,30 @@
 ## 2. Arborescence : où mettre quoi
 
 ```
-src/main/java/com/example/views/
-    MainLayout.java        ← layout racine (contenu + barre d'état) — NE PAS modifier sans raison
-    StatusBar.java         ← barre d'état partagée
-    AppHeader.java         ← en-tête blanc (logo + titre)
-    HomeView.java          ← menu d'accueil ; ouvre les vues dans des onglets fermables
-    AcceuilView.java / LoginView.java
-    Tcmgorg1MainView.java  ← VUE DE RÉFÉRENCE (à imiter)
-    specification.fr.md    ← ce document / specification.en.md ← version anglaise
-    <NouvelleVue>.java     ← une nouvelle vue = un nouveau fichier ici
+src/main/java/com/example/
+    Application.java           ← point d'entrée Spring Boot + @CssImport globaux (app.css + thèmes)
+    views/
+        MainLayout.java        ← layout racine (contenu + barre d'état) — NE PAS modifier sans raison
+        StatusBar.java         ← barre d'état partagée
+        AppHeader.java         ← en-tête blanc (logo + titre)
+        HomeView.java          ← menu d'accueil ; ouvre les vues en onglets ; menu Aide▸Thème
+        AcceuilView.java / LoginView.java
+        Tcmgorg1MainView.java  ← VUE DE RÉFÉRENCE (à imiter)
+        specification.fr.md    ← ce document / specification.en.md ← version anglaise
+        <NouvelleVue>.java     ← une nouvelle vue = un nouveau fichier ici
+
+src/main/frontend/styles/          ← CSS empaqueté par le build (Vite), via @CssImport
+    app.css                    ← FEUILLE DE STYLE UNIQUE : structure + tokens --orpv-* + thème par défaut
+    themes/<nom>.css           ← un thème = une variante d'attribut « html[theme~="<nom>"] » (voir §13)
 
 src/main/resources/META-INF/resources/
-    styles/app.css         ← FEUILLE DE STYLE UNIQUE de toute l'application
-    icons/<nom>.svg        ← icônes de la barre d'outils (une par fonction)
+    icons/<nom>.svg            ← icônes de la barre d'outils (ressources statiques, servies par URL)
 ```
 
 **Règles d'emplacement :**
 - Une vue migrée = **une classe** dans `com.example.views`.
-- **Tout le CSS va dans `app.css`** (jamais de `<style>` inline ni de fichier CSS supplémentaire). On y ajoute une **section numérotée** par fonctionnalité (voir §13).
-- Les icônes bitmap-rétro vont dans `icons/`, en **SVG**, nommées d'après leur **fonction** (voir §12).
+- **Tout le CSS de structure va dans `app.css`** (jamais de `<style>` inline ni de fichier ad hoc) ; on y ajoute une **section numérotée** par fonctionnalité (voir §13). Les **palettes** vont dans `styles/themes/<nom>.css`, une par thème.
+- `app.css` et les thèmes sont **empaquetés** (pas servis par URL) : ils sont déclarés via `@CssImport` sur `Application` (voir §13). Les **icônes** restent en `META-INF/resources/icons/` car elles sont chargées **par URL** (`new Image("icons/…")`).
 
 ---
 
@@ -129,7 +134,6 @@ package com.example.views;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -141,9 +145,10 @@ import org.springframework.context.annotation.Scope;
  * Vue de gestion de <…>. Corps de formulaire seul (ni fenêtre ni barre de titre),
  * destiné à être affiché dans un onglet par {@link HomeView}.
  */
+// Pas de @StyleSheet ici : app.css et les thèmes sont importés globalement via
+// @CssImport sur Application (voir §13). Une vue ne déclare aucune feuille de style.
 @Route(value = "<segment-url>", layout = MainLayout.class)
 @PageTitle("<Titre de la page>")
-@StyleSheet("styles/app.css")
 @SpringComponent
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class <NomVue> extends Div {
@@ -262,6 +267,28 @@ boutons à chaque bascule (les raccourcis se ré-enregistrent proprement à l'at
 le bouton « Interroger » bascule vers une barre d'interrogation ; son bouton « Annuler » rétablit
 la barre principale.
 
+### Actions câblées (impression, presse-papier, éditeur, quitter)
+
+Certains boutons-icônes déclenchent une action réelle, souvent côté navigateur via
+`getElement().executeJs(...)` (raccourci clavier + clic font la même chose) :
+
+- **Imprimer** (Maj+F8) : `ui.getPage().executeJs("window.print()")`. La feuille `@media print`
+  (§13 / app.css) masque le cadre pour n'imprimer que le formulaire.
+- **Couper / Copier / Coller / Éditer** : un script client installé **une fois** sur l'élément de la
+  vue (dans `onAttach`) suit le **dernier champ ayant eu le focus** et gère un **presse-papier
+  interne**. Les boutons appellent ce script (`__orpvCut/Copy/Paste`) ; « Éditer » ouvre une modale
+  *Éditeur* pré-remplie qui réécrit le champ au *OK*.
+  > ### ⚠ Piège light DOM (à connaître)
+  > En Vaadin 24+/25, l'`<input>`/`<textarea>` d'un `vaadin-text-field` / `vaadin-text-area` est dans
+  > le **light DOM** (et non le shadow) : récupérer le champ avec `host.querySelector('input,
+  > textarea')`, **pas** `host.shadowRoot.querySelector(...)`. L'événement `focusin` cible l'`<input>`
+  > lui-même → remonter au host via `closest('vaadin-text-field, vaadin-text-area')`. Pour synchroniser
+  > la valeur vers le serveur, poser `input.value` puis émettre les événements `input` et `change`.
+- **Quitter** : deux variantes. Dans la barre d'outils d'une vue, « Quitter » ferme **l'onglet hôte**
+  (`fermetureAction` injectée par `HomeView`, §17). Dans le menu **Fichier ▸ Quitter** de `HomeView`,
+  l'action ferme **l'onglet du navigateur** (`window.close()`, avec écran de fin en repli si le
+  navigateur refuse — il n'autorise `window.close()` que pour un onglet ouvert par script).
+
 ---
 
 ## 9. Onglets (TabSheet)
@@ -345,21 +372,53 @@ Deux familles, toutes deux `Dialog` `setDraggable(true).setResizable(true)`, tit
 
 ---
 
-## 13. CSS / thème
+## 13. CSS, thème et système de thèmes
 
-- **Fichier unique** `app.css`, importé par `@StyleSheet("styles/app.css")` sur chaque vue.
-- Organisé en **sections numérotées** avec un sommaire en tête. **Ajouter une nouvelle section
+### 13.1 Feuille de style unique (`app.css`)
+
+- **Emplacement** : `src/main/frontend/styles/app.css` — **empaquetée par le build** (Vite), pas
+  servie par URL. Déclarée **une seule fois**, globalement, par `@CssImport("./styles/app.css")` sur
+  `Application` (qui implémente `AppShellConfigurator`). **Une vue ne porte aucune annotation de
+  style** (plus de `@StyleSheet` par vue).
+- Organisée en **sections numérotées** avec un sommaire en tête. **Ajouter une nouvelle section
   numérotée** par fonctionnalité (suivre la numérotation existante).
-- **Tokens** dans `:root` (préfixe `--orpv-*`) : surfaces, bordures, texte, actions. **Réutiliser**
-  ces variables, ne pas coder les couleurs en dur.
-- **Densité** : la classe racine `orpv-body` porte les surcharges `--lumo-*` (taille de police,
-  hauteur des champs, rayons, fond blanc des champs bordurés). Toute nouvelle vue ajoute
-  `addClassName("orpv-body")`.
+- **Tokens** dans `:root` (préfixe `--orpv-*`) : surfaces, bordures, texte, actions, barre d'outils.
+  **Réutiliser** ces variables, ne pas coder les couleurs en dur. Certains tokens **dérivent** d'un
+  autre (ex. la barre d'outils reprend par défaut les tons de la barre d'état :
+  `--orpv-toolbar-bg: var(--orpv-statusbar-bg)`), pour suivre automatiquement le thème.
+- **Densité** : la classe racine `orpv-body` porte les surcharges `--lumo-*` (le projet utilise
+  **Lumo**, pas Aura, pour la densité et les composants ; `Aura.STYLESHEET` n'est importé que comme
+  socle). Toute nouvelle vue ajoute `addClassName("orpv-body")`.
 - **Scoping** : préfixer par `.orpv-body` quand il faut l'emporter sur la règle `display:block`
   des enfants directs (ex. `.orpv-body .orpv-toolbar { display:flex; }`).
 - Classes nommées par fonctionnalité (`orpv-toolbar`, `orpv-tabs`, `lieux-grid`,
-  `accreditation-grid`, `gestion-lieux-dialog`…). Pas de style inline sauf `getStyle().set("gap", …)`
-  ponctuel pour l'espacement des layouts.
+  `accreditation-grid`, `gestion-lieux-dialog`, `editeur-dialog`…). Pas de style inline sauf
+  `getStyle().set("gap", …)` ponctuel pour l'espacement des layouts.
+
+### 13.2 Système de thèmes (variantes d'attribut)
+
+- **Un thème = un fichier** `src/main/frontend/styles/themes/<nom>.css`, lui aussi déclaré par
+  `@CssImport` sur `Application` (donc empaqueté). Thèmes actuels : `gris_vert`, `bleu_azur`,
+  `vert_emeraude`, `terracotta`, `violet_amethyste`, `bleu_ardoise` (défaut), `gris`.
+- Chaque thème **ne surcharge que les tokens `--orpv-*`**, scopés sous une **variante d'attribut** :
+  `html[theme~="<slug>"] { --orpv-… }` (slug en tirets, ex. `bleu-ardoise`). Cette spécificité
+  (0,1,1) l'emporte sur le `:root` d'`app.css` (0,1,0) → le thème gagne, et comme les tokens sont
+  posés sur `<html>` ils se propagent partout (y compris la barre d'outils dérivée).
+- **Bascule** (menu *Aide ▸ Thème* dans `HomeView`) : on positionne l'attribut, on mémorise le choix.
+  ```java
+  // HomeView : JS_APPLIQUER_THEME, paramètre $0 = slug
+  "document.documentElement.setAttribute('theme', $0);" +
+  "window.localStorage.setItem('orpv-theme', $0);"
+  ```
+- **Restauration au chargement** (`MainLayout.onAttach`, exécuté à chaque navigation) : on relit le
+  slug mémorisé, sinon on applique le défaut.
+  ```java
+  "const t = window.localStorage.getItem('orpv-theme') || 'bleu-ardoise';" +
+  "document.documentElement.setAttribute('theme', t);"
+  ```
+- **Ajouter un thème** : créer `styles/themes/<nom>.css` (bloc `html[theme~="<slug>"]` qui pose les
+  `--orpv-*`), ajouter son `@CssImport` sur `Application`, et une entrée `appliquerTheme("<slug>")`
+  dans le menu de `HomeView`.
 
 ---
 
@@ -413,15 +472,28 @@ En cas de doute, se fier à l'apparence de la capture : champ blanc lisible → 
 
 ## 18. Build / exécution / vérification
 
-```powershell
-# JDK 25 obligatoire (la valeur par défaut de la machine ne convient pas)
-$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot"
+**Environnement recommandé : Dev Container WSL** (Compose, image `eclipse-temurin:25-jdk`, JDK 25
+intégré — **pas de `JAVA_HOME` à régler**). Dans le conteneur :
 
-.\mvnw.cmd -q compile            # compilation seule (validation rapide)
-.\mvnw.cmd compile spring-boot:run   # recompile puis lance (http://localhost:8080)
+```bash
+./mvnw -q compile     # compilation seule (validation rapide)
+./mvnw                # dev (goal par défaut spring-boot:run) → http://localhost:8080
 ```
 
-- **Pas de hot reload** : après un changement Java, **arrêter** le serveur, **recompiler**, **relancer**.
+**Sur l'hôte Windows** (si nécessaire), JDK 25 obligatoire (la valeur par défaut de la machine ne
+convient pas) :
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot"
+.\mvnw.cmd -q compile
+.\mvnw.cmd
+```
+
+- **CSS empaqueté** : `app.css` et les thèmes étant sous `src/main/frontend/styles/` (via
+  `@CssImport`), un changement de style passe par le **build frontend** (Vite). Au besoin, relancer
+  `./mvnw` (goal `build-frontend`) pour re-bundler ; un thème qui ne s'applique pas vient presque
+  toujours d'un bundle non régénéré.
+- **Pas de hot reload Java** : après un changement Java, **arrêter** le serveur, **recompiler**, **relancer**.
 - Vérification visuelle : ouvrir `http://localhost:8080/home`, ouvrir l'onglet de la vue, comparer à
   la capture. (Playwright MCP peut automatiser la navigation/capture si disponible.)
 - ⚠ L'IDE (serveur de langage Java) peut tourner sur un JDK plus ancien et signaler à tort
@@ -456,14 +528,16 @@ $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot"
 - Réutiliser les helpers (§7) et les patterns (§8–§11) **avant** d'inventer.
 - Tout nommer/écrire **en français** (UI, méthodes, variables, commentaires).
 - Factoriser le code commun en helpers **génériques** et réutilisables.
-- Mettre tout le style dans `app.css`, avec les tokens `--orpv-*`.
+- Mettre le style de **structure** dans `app.css` (tokens `--orpv-*`) ; les **palettes** dans
+  `styles/themes/<nom>.css` (variantes d'attribut, §13).
 - Simuler les données et marquer le point de branchement futur (§14).
 - Compiler (`mvnw`) et corriger jusqu'au vert ; signaler honnêtement l'état (compilé / vérifié / non
   testé).
 
 **À NE PAS FAIRE**
 - ❌ Ne pas introduire React/Hilla ni un autre framework UI.
-- ❌ Ne pas créer de second fichier CSS ni de style inline (hors `gap` ponctuel).
+- ❌ Ne pas créer de fichier CSS **ad hoc** ni de style inline (hors `gap` ponctuel) : la structure va
+  dans `app.css`, les palettes en variantes de thème (§13). Ne pas remettre de `@StyleSheet` par vue.
 - ❌ Ne pas transformer une vue en fenêtre/`Dialog` : une vue est un **corps** `Div` ouvert en onglet
   (sauf si la capture est explicitement une **fenêtre modale**).
 - ❌ Ne pas câbler de persistance/base de données sans demande explicite.

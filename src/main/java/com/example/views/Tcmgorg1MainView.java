@@ -3,7 +3,6 @@ package com.example.views;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -14,11 +13,8 @@ import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep.LabelsPosition;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -36,6 +32,17 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.example.util.MotifRecherche;
 import com.example.util.OrganismePourvoyeur;
 import com.example.util.OrganismesPourvoyeurs;
+import com.example.views.shared.BarreOutils;
+import com.example.views.shared.VueFormulaire;
+
+import static com.example.views.shared.Champs.appliquerResultats;
+import static com.example.views.shared.Champs.boutonRecherche;
+import static com.example.views.shared.Champs.champAvecRecherche;
+import static com.example.views.shared.Champs.champTexte;
+import static com.example.views.shared.Champs.checkboxAvecLibelle;
+import static com.example.views.shared.Champs.formulaireResponsive;
+import static com.example.views.shared.Champs.groupeChamps;
+import static com.example.views.shared.Champs.ligneFormulaire;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
@@ -56,7 +63,7 @@ import java.util.stream.Collectors;
 @PageTitle("Gestion des organismes pourvoyeurs")
 @SpringComponent
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class Tcmgorg1MainView extends Div {
+public class Tcmgorg1MainView extends VueFormulaire {
 
     // --- Section identification ---
     private TextField codeOrpvField;
@@ -106,12 +113,6 @@ public class Tcmgorg1MainView extends Div {
     /** Onglet « Adresse secondaire » ; son libellé porte le nombre d'adresses (0 ou 1). */
     private Tab adresseSecondaireTab;
 
-    /** Barre d'outils ; son contenu bascule entre mode principal et mode interrogation. */
-    private Div barre;
-
-    /** Action de fermeture de l'onglet hôte, injectée par {@link HomeView}. */
-    private Runnable fermetureAction;
-
     /** Jeu de données fictives parcouru par les boutons de navigation. */
     private final List<OrganismePourvoyeur> enregistrements =
             OrganismesPourvoyeurs.generer(2000);
@@ -120,11 +121,10 @@ public class Tcmgorg1MainView extends Div {
     private int indexCourant;
 
     public Tcmgorg1MainView() {
-        // HomeView est constitué uniquement du corps du formulaire :
-        // on ajoute directement les sections de saisie, sans fenêtre ni titre.
-        addClassName("orpv-body");
-        add(creerToolBar(),
-            creerFormulaireIdentite(),
+        // Corps de formulaire seul (la classe orpv-body est posée par VueFormulaire) :
+        // on ajoute directement la barre d'outils et les sections de saisie.
+        add(creerBarreOutils(),
+                creerFormulaireIdentite(),
                 creerLigneOptions(),
                 creerOnglets(),
                 creerFormulaireComplement());
@@ -137,7 +137,6 @@ public class Tcmgorg1MainView extends Div {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        installerPressePapier();
         majBarreStatut();
     }
 
@@ -146,40 +145,24 @@ public class Tcmgorg1MainView extends Div {
     // ------------------------------------------------------------------
 
     /**
-     * Barre d'outils façon application bureautique : 14 boutons-icônes
-     * regroupés (fichier / édition / navigation / enregistrements / requête).
-     * Chaque bouton porte une info-bulle décrivant sa fonction et son
-     * raccourci clavier, lequel déclenche le clic du bouton.
-     *
-     * <p>Le bouton « Interroger » bascule la barre en mode interrogation
-     * ({@link #afficherToolBarInterrogation()}) ; le bouton « Annuler » de ce
-     * mode rétablit la barre principale ({@link #afficherToolBarPrincipale()}).</p>
+     * Barre d'outils commune ({@link BarreOutils}) configurée pour cette vue :
+     * navigation entre enregistrements et entrée/sortie du mode interrogation
+     * (lequel active la liste de valeurs sur le code ORPV et vide les champs).
+     * Les fonctions génériques (impression, presse-papier, éditeur) sont portées
+     * par le composant lui-même.
      */
-    private Component creerToolBar() {
-        barre = new Div();
-        barre.addClassName("orpv-toolbar");
-        afficherToolBarPrincipale();
-        return barre;
-    }
-
-    /** Rétablit (ou installe) les boutons de la barre d'outils principale. */
-    private void afficherToolBarPrincipale() {
-        barre.removeAll();
-        barre.add(boutonsPrincipaux());
-        activerLookupCodeOrpv(false);
-    }
-
-    /**
-     * Bascule la barre d'outils en mode interrogation : seuls subsistent les
-     * boutons d'impression et d'édition, complétés des actions propres à
-     * l'interrogation (exécuter, décompter, annuler). Le mode interrogation
-     * active la liste de valeurs sur le code ORPV.
-     */
-    private void afficherToolBarInterrogation() {
-        barre.removeAll();
-        barre.add(boutonsInterrogation());
-        activerLookupCodeOrpv(true);
-        effacerChamps();
+    private BarreOutils creerBarreOutils() {
+        return new BarreOutils(this)
+                .surQuitter(this::quitter)
+                .surPremier(this::allerPremier)
+                .surPrecedent(this::allerPrecedent)
+                .surSuivant(this::allerSuivant)
+                .surDernier(this::allerDernier)
+                .surInterrogation(() -> {
+                    activerLookupCodeOrpv(true);
+                    effacerChamps();
+                })
+                .surFinInterrogation(() -> activerLookupCodeOrpv(false));
     }
 
     /**
@@ -241,443 +224,6 @@ public class Tcmgorg1MainView extends Div {
         codeRevenuMeqField.clear();
         anneeFinActiviteField.clear();
         moisFermetureField.clear();
-    }
-
-    /** Les 14 boutons de la barre d'outils principale, recréés à chaque appel. */
-    private Component[] boutonsPrincipaux() {
-        return new Component[] {
-                // 1 à 3 — fichier
-                boutonOutilAction("quitter",
-                        "Quitter l'application en cours et revenir à la page précédente ou à la page d'accueil (Ctrl+Q)",
-                        this::quitter, Key.KEY_Q, KeyModifier.CONTROL),
-                boutonOutil("enregistrer",
-                        "Enregistrer les changements effectués à une entente de financement (F10)",
-                        Key.F10),
-                boutonOutilAction("imprimer",
-                        "Imprimer la fenêtre courante (Maj+F8)",
-                        this::imprimer, Key.F8, KeyModifier.SHIFT),
-                separateur(),
-                // 4 à 7 — édition
-                boutonCouper(),
-                boutonCopier(),
-                boutonColler(),
-                boutonEditer(),
-                separateur(),
-                // 8 à 11 — navigation entre enregistrements
-                boutonOutilAction("premier",
-                        "Aller au premier enregistrement",
-                        this::allerPremier),
-                boutonOutilNavigationAction("precedent",
-                        "Aller à l'enregistrement précédent (Flèche haut)",
-                        Key.ARROW_UP, this::allerPrecedent),
-                boutonOutilNavigationAction("suivant",
-                        "Aller à l'enregistrement suivant (Flèche bas)",
-                        Key.ARROW_DOWN, this::allerSuivant),
-                boutonOutilAction("dernier",
-                        "Aller au dernier enregistrement",
-                        this::allerDernier),
-                separateur(),
-                // 12 à 13 — enregistrements
-                boutonOutil("nouveau",
-                        "Créer un nouvel enregistrement (F6)",
-                        Key.F6),
-                boutonOutil("detruire",
-                        "Détruire ou effacer l'enregistrement courant identifié par le curseur (Maj+F6)",
-                        Key.F6, KeyModifier.SHIFT),
-                separateur(),
-                // 14 — interrogation
-                boutonOutilAction("interroger",
-                        "Lancer le mode d'interrogation (F7)",
-                        this::afficherToolBarInterrogation, Key.F7)
-        };
-    }
-
-    /**
-     * Les boutons de la barre d'outils en mode interrogation : impression et
-     * édition (couper / copier / coller / éditer) qui reviennent, puis les
-     * actions propres à l'interrogation (exécuter, décompter, annuler).
-     * Recréés à chaque appel.
-     */
-    private Component[] boutonsInterrogation() {
-        return new Component[] {
-                boutonOutilAction("imprimer",
-                        "Imprimer la fenêtre courante (Maj+F8)",
-                        this::imprimer, Key.F8, KeyModifier.SHIFT),
-                separateur(),
-                boutonCouper(),
-                boutonCopier(),
-                boutonColler(),
-                boutonEditer(),
-                separateur(),
-                boutonOutil("executer",
-                        "Exécuter l'interrogation"),
-                boutonOutil("decompter",
-                        "Décompter"),
-                boutonOutilAction("annuler",
-                        "Annuler l'opération",
-                        this::afficherToolBarPrincipale)
-        };
-    }
-
-    /** Bouton-icône (sans raccourci) : l'icône SVG est servie depuis /icons. */
-    private Button boutonOutil(String icone, String infoBulle) {
-        Image image = new Image("icons/" + icone + ".svg", infoBulle);
-        image.addClassName("orpv-tool-icon");
-        Button bouton = new Button(image);
-        bouton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY,
-                ButtonVariant.LUMO_SMALL);
-        bouton.addClassName("orpv-tool-button");
-        bouton.setTooltipText(infoBulle);
-        bouton.setAriaLabel(infoBulle);
-        return bouton;
-    }
-
-    /** Bouton-icône dont le raccourci clavier déclenche le clic. */
-    private Button boutonOutil(String icone, String infoBulle, Key touche,
-            KeyModifier... modificateurs) {
-        Button bouton = boutonOutil(icone, infoBulle);
-        bouton.addClickShortcut(touche, modificateurs);
-        return bouton;
-    }
-
-    /** Bouton-icône avec une action au clic, en plus du raccourci clavier. */
-    private Button boutonOutilAction(String icone, String infoBulle, Runnable action,
-            Key touche, KeyModifier... modificateurs) {
-        Button bouton = boutonOutilAction(icone, infoBulle, action);
-        bouton.addClickShortcut(touche, modificateurs);
-        return bouton;
-    }
-
-    /** Bouton-icône avec une action au clic (sans raccourci clavier). */
-    private Button boutonOutilAction(String icone, String infoBulle, Runnable action) {
-        Button bouton = boutonOutil(icone, infoBulle);
-        bouton.addClickListener(event -> action.run());
-        return bouton;
-    }
-
-    /**
-     * Bouton de navigation dont le raccourci est une flèche : on laisse le
-     * navigateur conserver son comportement par défaut (déplacement du curseur
-     * dans les champs) en plus du déclenchement du bouton.
-     */
-    private Button boutonOutilNavigation(String icone, String infoBulle, Key touche) {
-        Button bouton = boutonOutil(icone, infoBulle);
-        bouton.addClickShortcut(touche).allowBrowserDefault();
-        return bouton;
-    }
-
-    /** Bouton de navigation (raccourci flèche) doté en plus d'une action au clic. */
-    private Button boutonOutilNavigationAction(String icone, String infoBulle, Key touche,
-            Runnable action) {
-        Button bouton = boutonOutilNavigation(icone, infoBulle, touche);
-        bouton.addClickListener(event -> action.run());
-        return bouton;
-    }
-
-    /** Séparateur vertical entre deux groupes de boutons. */
-    private Span separateur() {
-        Span sep = new Span();
-        sep.addClassName("orpv-toolbar-sep");
-        return sep;
-    }
-
-    /**
-     * Définit l'action de « Quitter » : la fermeture de l'onglet hôte.
-     * Injectée par {@link HomeView} à l'ouverture de l'onglet.
-     */
-    public void setFermetureAction(Runnable fermetureAction) {
-        this.fermetureAction = fermetureAction;
-    }
-
-    /**
-     * « Quitter » : ferme l'onglet hôte s'il existe, sinon (vue ouverte seule
-     * via sa route) revient à l'écran d'accueil.
-     */
-    private void quitter() {
-        if (fermetureAction != null) {
-            fermetureAction.run();
-        } else {
-            getUI().ifPresent(ui -> ui.navigate(AcceuilView.class));
-        }
-    }
-
-    /**
-     * « Imprimer » : déclenche la boîte de dialogue d'impression du navigateur
-     * pour la fenêtre courante.
-     */
-    private void imprimer() {
-        getUI().ifPresent(ui -> ui.getPage().executeJs("window.print()"));
-    }
-
-    // ------------------------------------------------------------------
-    // Édition : couper / copier / coller / éditer
-    // ------------------------------------------------------------------
-
-    /**
-     * Script client installé une seule fois sur l'élément de la vue. Il suit le
-     * dernier champ de saisie ({@code vaadin-text-field} / {@code vaadin-text-area})
-     * ayant eu le focus dans le formulaire et expose, sur ce même élément, les
-     * fonctions de couper / copier / coller / édition. Le presse-papier
-     * ({@code __orpvClip}) est conservé côté navigateur : un texte coupé ou copié
-     * dans un champ peut donc être collé dans un autre. Chaque modification est
-     * répercutée vers le serveur via les événements {@code input} et {@code change}.
-     *
-     * <p>Le suivi est limité à la sous-arborescence de la vue ; les champs des
-     * fenêtres modales (rendues dans un calque détaché) ne sont pas pris en compte,
-     * ce qui préserve le champ cible pendant l'édition.</p>
-     */
-    private static final String CLIPBOARD_JS = """
-            const root = this;
-            if (root.__orpvInstalled) { return; }
-            root.__orpvInstalled = true;
-
-            // L'input est dans le light DOM : l'événement de focus cible l'<input>
-            // lui-même, d'où la remontée vers le host du champ via closest().
-            const champHote = (el) => (el && el.closest)
-                    ? el.closest('vaadin-text-field, vaadin-text-area, vaadin-password-field')
-                    : null;
-
-            const interne = (hote) => {
-                if (!hote) { return null; }
-                // Vaadin 24+/25 place l'input dans le light DOM (slotté), pas dans le shadow.
-                let i = hote.querySelector ? hote.querySelector('input, textarea') : null;
-                if (i) { return i; }
-                if (hote.shadowRoot) {
-                    i = hote.shadowRoot.querySelector('input, textarea');
-                    if (i) { return i; }
-                }
-                return (hote.localName === 'input' || hote.localName === 'textarea') ? hote : null;
-            };
-
-            root.addEventListener('focusin', (e) => {
-                const hote = champHote(e.target);
-                if (hote) { root.__orpvLast = hote; }
-            }, true);
-
-            // À la perte du focus, on mémorise la sélection : un navigateur peut la
-            // replier après le blur, alors qu'on en a besoin lors du clic sur un bouton.
-            root.addEventListener('focusout', (e) => {
-                const hote = champHote(e.target);
-                if (hote) {
-                    const i = interne(hote);
-                    if (i) {
-                        root.__orpvSel = { hote: hote, debut: i.selectionStart, fin: i.selectionEnd };
-                    }
-                }
-            }, true);
-
-            const selection = (hote, i) => {
-                let d = i.selectionStart, f = i.selectionEnd;
-                if (d === f && root.__orpvSel && root.__orpvSel.hote === hote) {
-                    d = root.__orpvSel.debut;
-                    f = root.__orpvSel.fin;
-                }
-                return { debut: Math.min(d, f), fin: Math.max(d, f) };
-            };
-
-            const appliquer = (i, valeur, curseur) => {
-                i.value = valeur;
-                i.setSelectionRange(curseur, curseur);
-                i.dispatchEvent(new Event('input', { bubbles: true }));
-                i.dispatchEvent(new Event('change', { bubbles: true }));
-                i.focus();
-            };
-
-            root.__orpvCut = () => {
-                const hote = root.__orpvLast, i = interne(hote);
-                if (!i || i.readOnly || i.disabled) { return; }
-                const s = selection(hote, i);
-                if (s.debut === s.fin) { return; }
-                root.__orpvClip = i.value.substring(s.debut, s.fin);
-                try { if (navigator.clipboard) { navigator.clipboard.writeText(root.__orpvClip); } } catch (e) {}
-                appliquer(i, i.value.slice(0, s.debut) + i.value.slice(s.fin), s.debut);
-            };
-
-            root.__orpvCopy = () => {
-                const hote = root.__orpvLast, i = interne(hote);
-                if (!i) { return; }
-                const s = selection(hote, i);
-                if (s.debut === s.fin) { return; }
-                root.__orpvClip = i.value.substring(s.debut, s.fin);
-                try { if (navigator.clipboard) { navigator.clipboard.writeText(root.__orpvClip); } } catch (e) {}
-                i.focus();
-                i.setSelectionRange(s.debut, s.fin);
-            };
-
-            root.__orpvPaste = () => {
-                const hote = root.__orpvLast, i = interne(hote);
-                if (!i || i.readOnly || i.disabled) { return; }
-                const clip = root.__orpvClip || '';
-                if (!clip) { return; }
-                const s = selection(hote, i);
-                appliquer(i, i.value.slice(0, s.debut) + clip + i.value.slice(s.fin), s.debut + clip.length);
-            };
-
-            // Mémorise le champ cible puis renvoie son contenu pour la fenêtre Éditeur.
-            root.__orpvEditText = () => {
-                root.__orpvEditTarget = root.__orpvLast;
-                const i = interne(root.__orpvEditTarget);
-                return i ? i.value : null;
-            };
-
-            // Reporte le texte édité dans le champ mémorisé par __orpvEditText.
-            root.__orpvSetText = (texte) => {
-                const i = interne(root.__orpvEditTarget);
-                if (!i || i.readOnly || i.disabled) { return; }
-                const valeur = texte == null ? '' : texte;
-                appliquer(i, valeur, valeur.length);
-            };
-            """;
-
-    /** Installe (une seule fois) le script client de gestion du presse-papier. */
-    private void installerPressePapier() {
-        getElement().executeJs(CLIPBOARD_JS);
-    }
-
-    /**
-     * Bouton d'édition : le clic — comme le raccourci {@code Ctrl+touche} — appelle
-     * la fonction JavaScript {@code fonction} exposée sur l'élément de la vue.
-     */
-    private Button boutonEdition(String icone, String infoBulle, String fonction, Key touche) {
-        Button bouton = boutonOutil(icone, infoBulle);
-        bouton.addClickListener(e -> getElement()
-                .executeJs("this." + fonction + " && this." + fonction + "()"));
-        bouton.addClickShortcut(touche, KeyModifier.CONTROL);
-        return bouton;
-    }
-
-    private Button boutonCouper() {
-        return boutonEdition("couper",
-                "Couper le texte sélectionné (Ctrl+X)", "__orpvCut", Key.KEY_X);
-    }
-
-    private Button boutonCopier() {
-        return boutonEdition("copier",
-                "Copier le texte sélectionné (Ctrl+C)", "__orpvCopy", Key.KEY_C);
-    }
-
-    private Button boutonColler() {
-        return boutonEdition("coller",
-                "Coller le texte précédemment coupé ou copié (Ctrl+V)", "__orpvPaste", Key.KEY_V);
-    }
-
-    private Button boutonEditer() {
-        Button bouton = boutonOutil("editer",
-                "Éditer le contenu du champ de la zone de texte où le curseur est positionné (Ctrl+E)");
-        bouton.addClickListener(e -> editer());
-        bouton.addClickShortcut(Key.KEY_E, KeyModifier.CONTROL);
-        return bouton;
-    }
-
-    /**
-     * « Éditer » : récupère le contenu du dernier champ ayant eu le focus puis
-     * ouvre la fenêtre « Éditeur » pré-remplie. Si aucun champ n'est ciblé (valeur
-     * {@code null} renvoyée par le client), aucune fenêtre n'est ouverte.
-     */
-    private void editer() {
-        getElement().executeJs("return (this.__orpvEditText ? this.__orpvEditText() : null);")
-                .then(String.class, texte -> {
-                    if (texte != null) {
-                        ouvrirEditeur(texte);
-                    }
-                });
-    }
-
-    /**
-     * Fenêtre modale « Éditeur » : une grande zone de texte pré-remplie avec le
-     * contenu du champ courant. « OK » reporte le texte modifié dans le champ
-     * d'origine, « Annuler » referme sans rien changer et « Rechercher » sélectionne
-     * une occurrence de texte dans la zone d'édition.
-     */
-    private void ouvrirEditeur(String texte) {
-        Dialog dialog = new Dialog();
-        dialog.setHeaderTitle("Éditeur");
-        dialog.setDraggable(true);
-        dialog.setResizable(true);
-        dialog.addClassName("editeur-dialog");
-        dialog.setWidth("480px");
-        dialog.setHeight("320px");
-
-        TextArea zone = new TextArea();
-        zone.setValue(texte);
-        zone.setWidthFull();
-        zone.setHeight("100%");
-        zone.addThemeVariants(TextAreaVariant.LUMO_SMALL);
-        zone.focus();
-
-        VerticalLayout contenu = new VerticalLayout(zone);
-        contenu.setPadding(false);
-        contenu.setSpacing(false);
-        contenu.setSizeFull();
-        contenu.setFlexGrow(1, zone);
-        dialog.add(contenu);
-
-        Button okButton = new Button("OK", e -> {
-            getElement().executeJs("this.__orpvSetText && this.__orpvSetText($0)", zone.getValue());
-            dialog.close();
-        });
-        okButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
-        okButton.addClassName("orpv-dialog-ok");
-
-        Button annulerButton = new Button("Annuler", e -> dialog.close());
-        annulerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-        annulerButton.addClickShortcut(Key.ESCAPE);
-
-        Button rechercherButton = new Button("Rechercher", e -> ouvrirRechercheEditeur(zone));
-        rechercherButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
-
-        dialog.getFooter().add(okButton, annulerButton, rechercherButton);
-        dialog.open();
-    }
-
-    /**
-     * Sous-fenêtre « Rechercher » de l'éditeur : saisie d'un texte à localiser. À
-     * la validation, la première occurrence trouvée dans la zone d'édition est
-     * sélectionnée ; sinon une notification signale l'échec.
-     */
-    private void ouvrirRechercheEditeur(TextArea zone) {
-        Dialog dialog = new Dialog();
-        dialog.setHeaderTitle("Rechercher");
-        dialog.setDraggable(true);
-
-        TextField terme = new TextField("Texte à rechercher");
-        terme.setWidthFull();
-        terme.focus();
-
-        VerticalLayout contenu = new VerticalLayout(terme);
-        contenu.setPadding(false);
-        contenu.setWidth("20em");
-        dialog.add(contenu);
-
-        Runnable rechercher = () -> {
-            zone.getElement().executeJs(
-                    "const i = this.querySelector('textarea')"
-                  + "    || (this.shadowRoot ? this.shadowRoot.querySelector('textarea') : null);"
-                  + "const t = $0;"
-                  + "if (!i || !t) { return false; }"
-                  + "const idx = i.value.indexOf(t);"
-                  + "if (idx < 0) { return false; }"
-                  + "i.focus(); i.setSelectionRange(idx, idx + t.length); return true;",
-                    terme.getValue())
-                    .then(Boolean.class, trouve -> {
-                        if (!Boolean.TRUE.equals(trouve)) {
-                            Notification.show("Texte introuvable");
-                        }
-                    });
-            dialog.close();
-        };
-
-        Button okButton = new Button("OK", e -> rechercher.run());
-        okButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
-        okButton.addClassName("orpv-dialog-ok");
-        okButton.addClickShortcut(Key.ENTER);
-
-        Button annulerButton = new Button("Annuler", e -> dialog.close());
-        annulerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-        annulerButton.addClickShortcut(Key.ESCAPE);
-
-        dialog.getFooter().add(okButton, annulerButton);
-        dialog.open();
     }
 
     // ------------------------------------------------------------------
@@ -772,10 +318,8 @@ public class Tcmgorg1MainView extends Div {
      * {@link MainLayout}.
      */
     private void majBarreStatut() {
-        MainLayout.rechercher(this)
-                .ifPresent(layout -> layout.getStatusBar().setMessage(
-                        "Gestion des organismes pourvoyeurs | Eng. "
-                                + (indexCourant + 1) + "/" + enregistrements.size()));
+        majStatut("Gestion des organismes pourvoyeurs | Eng. "
+                + (indexCourant + 1) + "/" + enregistrements.size());
     }
 
     /** Bloc supérieur : codes, nom, ville. */
@@ -994,7 +538,6 @@ public class Tcmgorg1MainView extends Div {
      */
     private List<Accreditation> accreditationsVierges() {
         return List.of(
-                new Accreditation("", "", "", "", ""),
                 new Accreditation("", "", "", "", ""),
                 new Accreditation("", "", "", "", ""),
                 new Accreditation("", "", "", "", ""));
@@ -1327,37 +870,6 @@ public class Tcmgorg1MainView extends Div {
         dialog.open();
     }
 
-    /**
-     * Ligne « libellé : contenu » de la fenêtre Gestion des lieux. Le libellé
-     * occupe une colonne fixe pour aligner les champs ; {@code etirer} indique si
-     * le contenu doit occuper toute la largeur restante.
-     */
-    private HorizontalLayout ligneFormulaire(String libelle, Component contenu, boolean etirer) {
-        Span label = new Span(libelle);
-        label.addClassName("gestion-lieux-label");
-        label.setWidth("120px");
-        label.setMinWidth("120px");
-        HorizontalLayout ligne = new HorizontalLayout(label, contenu);
-        ligne.setWidthFull();
-        ligne.setAlignItems(Alignment.CENTER);
-        ligne.setSpacing(false);
-        ligne.getStyle().set("gap", "8px");
-        if (etirer) {
-            ligne.setFlexGrow(1, contenu);
-        }
-        return ligne;
-    }
-
-    /** Groupe horizontal compact de composants (champ + bouton + libellé côte à côte). */
-    private HorizontalLayout groupeChamps(Component... composants) {
-        HorizontalLayout groupe = new HorizontalLayout(composants);
-        groupe.setPadding(false);
-        groupe.setSpacing(false);
-        groupe.setAlignItems(Alignment.CENTER);
-        groupe.getStyle().set("gap", "5px");
-        return groupe;
-    }
-
     // ------------------------------------------------------------------
     // Liste des lieux (lookup ville)
     // ------------------------------------------------------------------
@@ -1455,14 +967,6 @@ public class Tcmgorg1MainView extends Div {
 
         dialog.getFooter().add(rechButton, okButton, annulerButton);
         dialog.open();
-    }
-
-    /** Remplit la grille avec les résultats et présélectionne la première ligne. */
-    private <T> void appliquerResultats(Grid<T> grille, List<T> resultats) {
-        grille.setItems(resultats);
-        if (!resultats.isEmpty()) {
-            grille.select(resultats.get(0));
-        }
     }
 
     /**
@@ -1618,57 +1122,4 @@ public class Tcmgorg1MainView extends Div {
     public record Categorie(String description, String code) {
     }
 
-    // ------------------------------------------------------------------
-    // Fabriques utilitaires
-    // ------------------------------------------------------------------
-
-    /** FormLayout avec labels à gauche, repassant en 1 colonne sur mobile. */
-    private FormLayout formulaireResponsive(int colonnesMax) {
-        FormLayout form = new FormLayout();
-        form.setWidthFull();
-        form.setResponsiveSteps(
-                new ResponsiveStep("0", 1, LabelsPosition.TOP),
-                new ResponsiveStep("30em", 2, LabelsPosition.ASIDE),
-                new ResponsiveStep("60em", colonnesMax, LabelsPosition.ASIDE));
-        form.setLabelWidth("110px");
-        return form;
-    }
-
-    private TextField champTexte(String valeur) {
-        TextField champ = new TextField();
-        champ.setValue(valeur);
-        champ.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-        return champ;
-    }
-
-    /** Petit bouton « loupe / liste » placé à droite d'un champ code. */
-    private Button boutonRecherche() {
-        Button bouton = new Button(VaadinIcon.LIST.create());
-        bouton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ICON,
-                ButtonVariant.LUMO_TERTIARY);
-        bouton.addClassName("orpv-lookup-button");
-        bouton.setTooltipText("Liste de valeurs");
-        return bouton;
-    }
-
-    private HorizontalLayout champAvecRecherche(TextField champ, Button bouton) {
-        HorizontalLayout ligne = new HorizontalLayout(champ, bouton);
-        ligne.setWidthFull();
-        ligne.setSpacing(false);
-        ligne.setAlignItems(Alignment.CENTER);
-        ligne.getStyle().set("gap", "4px");
-        ligne.setFlexGrow(1, champ);
-        return ligne;
-    }
-
-    /** Libellé à gauche + case à cocher à droite, comme sur l'écran d'origine. */
-    private HorizontalLayout checkboxAvecLibelle(String libelle, Checkbox checkbox) {
-        Span span = new Span(libelle);
-        span.addClassName("orpv-checkbox-label");
-        HorizontalLayout ligne = new HorizontalLayout(span, checkbox);
-        ligne.setAlignItems(Alignment.CENTER);
-        ligne.setSpacing(false);
-        ligne.getStyle().set("gap", "6px");
-        return ligne;
-    }
 }

@@ -1,18 +1,16 @@
 # Data Model
 
-> Entity definitions and relationships. Evolves as features are added.
+> Domain entities. **No database yet** — list/grid data is simulated in code (`xxxSimules()` / mock generators), so this describes the in-memory shapes used by the views and the future persistence target.
 
-| Entity | Key Fields | Relationships |
-|--------|-----------|-----------------|
-| User | id, username, email, role, department | Has many Expenses (as submitter), Has many Approvals (as approver) |
-| Expense | id, description, amount, category, status, submitted_date, currency | Belongs to User (submitter), Has many LineItems, Has many Receipts, Has many Approvals |
-| LineItem | id, description, amount, category | Belongs to Expense |
-| Receipt | id, file_path, file_name, upload_date | Belongs to Expense |
-| Approval | id, status, approver_comment, reviewed_date | Belongs to User (approver), Belongs to Expense |
-| ApprovalPolicy | id, name, approval_levels, amount_threshold | Referenced by Approval workflow |
+| Entity | Key fields | Notes |
+|--------|-----------|-------|
+| **OrganismePourvoyeur** (ORPV) | codeOrpv, siru, mess, acronyme, nom, autreNom, villeCode, villeLibelle, payeurFraisIndirect, comptabilisationFondsInternes, fondsDotation, adressePrincipale, adresseSecondaire, accreditations, remarque, categorieCode, categorieLibelle, siteWww, codeRevenuMeq, anneeFinActivite, moisFermeture | The reference screen (`Tcmgorg1MainView`). Generated in bulk by `OrganismesPourvoyeurs.generer(n)` |
+| **Adresse** | ligne1, ligne2, ligne3, codePostal | Principal and secondary address of an ORPV |
+| **Accreditation** | debut, fin, organisme, creation, modification | Editable accreditation grid rows of an ORPV |
+| **Lieu** | nomLieu, code, type, paysAttache | Lookup list (ville) — `lieuxSimules()` |
+| **Categorie** | description, code | Lookup list (catégorie d'organisme) — `categoriesSimulees()` |
 
-## Status Enums
+## Simulation / persistence
 
-- **Expense Status:** Draft, Submitted, Pending Approval, Approved, Rejected, Reimbursed
-- **Approval Status:** Pending, Approved, Rejected
-- **User Role:** Employee, Manager, Admin
+- Mock generators live next to the views (`com.example.util.OrganismesPourvoyeurs`, and `xxxSimules()` methods inside the views).
+- Each generator is commented as **temporary, to be replaced by real database queries**. That comment marks the single wiring point for future persistence; do not introduce a database without an explicit request.

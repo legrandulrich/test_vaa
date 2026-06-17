@@ -31,7 +31,7 @@
 10. [Editable grid (multi-record block)](#10-editable-grid-multi-record-block)
 11. [Modal windows (Dialog)](#11-modal-windows-dialog)
 12. [SVG icons](#12-svg-icons)
-13. [CSS / theme](#13-css--theme)
+13. [CSS, theme and theme system](#13-css-theme-and-theme-system)
 14. [Simulated data (mock)](#14-simulated-data-mock)
 15. [Read-only vs disabled](#15-read-only-vs-disabled)
 16. [Keyboard shortcuts](#16-keyboard-shortcuts)
@@ -58,26 +58,33 @@
 ## 2. Project layout: where things go
 
 ```
-src/main/java/com/example/views/
-    MainLayout.java        ← root layout (content + status bar) — DO NOT change without reason
-    StatusBar.java         ← shared status bar
-    AppHeader.java         ← white header (logo + title)
-    HomeView.java          ← home menu; opens views in closable tabs
-    AcceuilView.java / LoginView.java
-    Tcmgorg1MainView.java  ← REFERENCE VIEW (to imitate)
-    specification.fr.md    ← French reference / specification.en.md ← this file
-    <NewView>.java         ← a migrated view = a new file here
+src/main/java/com/example/
+    Application.java           ← Spring Boot entry point + global @CssImport (app.css + themes)
+    views/
+        MainLayout.java        ← root layout (content + status bar) — DO NOT change without reason
+        StatusBar.java         ← shared status bar
+        AppHeader.java         ← white header (logo + title)
+        HomeView.java          ← home menu; opens views as tabs; Help▸Theme menu
+        AcceuilView.java / LoginView.java
+        Tcmgorg1MainView.java  ← REFERENCE VIEW (to imitate)
+        specification.fr.md    ← French reference / specification.en.md ← this file
+        <NewView>.java         ← a migrated view = a new file here
+
+src/main/frontend/styles/          ← CSS bundled by the build (Vite), via @CssImport
+    app.css                    ← THE SINGLE STYLESHEET: structure + --orpv-* tokens + default theme
+    themes/<name>.css          ← one theme = one attribute variant `html[theme~="<name>"]` (see §13)
 
 src/main/resources/META-INF/resources/
-    styles/app.css         ← THE SINGLE STYLESHEET for the whole application
-    icons/<name>.svg       ← toolbar icons (one per function)
+    icons/<name>.svg           ← toolbar icons (static resources, served by URL)
 ```
 
 **Placement rules:**
 - One migrated view = **one class** in `com.example.views`.
-- **All CSS lives in `app.css`** (never inline `<style>`, never an extra CSS file). Add a
-  **numbered section** per feature (see §13).
-- Retro-bitmap icons go in `icons/`, as **SVG**, named after their **function** (see §12).
+- **All structural CSS lives in `app.css`** (never inline `<style>`, never an ad-hoc file); add a
+  **numbered section** per feature (see §13). **Palettes** go in `styles/themes/<name>.css`, one per theme.
+- `app.css` and themes are **bundled** (not served by URL): declared via `@CssImport` on `Application`
+  (see §13). **Icons** stay in `META-INF/resources/icons/` because they are loaded **by URL**
+  (`new Image("icons/…")`).
 
 ---
 
@@ -131,7 +138,6 @@ package com.example.views;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -143,9 +149,10 @@ import org.springframework.context.annotation.Scope;
  * Vue de gestion de <…>. Corps de formulaire seul (ni fenêtre ni barre de titre),
  * destiné à être affiché dans un onglet par {@link HomeView}.
  */
+// No @StyleSheet here: app.css and the themes are imported globally via @CssImport
+// on Application (see §13). A view declares no stylesheet of its own.
 @Route(value = "<url-segment>", layout = MainLayout.class)
 @PageTitle("<Page title>")
-@StyleSheet("styles/app.css")
 @SpringComponent
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class <ViewName> extends Div {
@@ -263,6 +270,27 @@ Reference helpers:
 each switch (shortcuts re-register cleanly on attach). Model: the "Interroger" button switches to a
 query toolbar; its "Annuler" button restores the main toolbar.
 
+### Wired actions (print, clipboard, editor, quit)
+
+Some icon buttons trigger a real action, often on the browser side via
+`getElement().executeJs(...)` (keyboard shortcut and click do the same thing):
+
+- **Print** (Shift+F8): `ui.getPage().executeJs("window.print()")`. The `@media print` sheet
+  (§13 / app.css) hides the chrome so only the form prints.
+- **Cut / Copy / Paste / Edit**: a client script installed **once** on the view element (in
+  `onAttach`) tracks the **last focused field** and keeps an **internal clipboard**. The buttons call
+  it (`__orpvCut/Copy/Paste`); "Edit" opens a pre-filled *Editor* modal that rewrites the field on *OK*.
+  > ### ⚠ Light DOM gotcha (must know)
+  > In Vaadin 24+/25, the `<input>`/`<textarea>` of a `vaadin-text-field` / `vaadin-text-area` lives in
+  > the **light DOM** (not the shadow): get the field with `host.querySelector('input, textarea')`,
+  > **not** `host.shadowRoot.querySelector(...)`. The `focusin` event targets the `<input>` itself →
+  > resolve the host via `closest('vaadin-text-field, vaadin-text-area')`. To sync the value to the
+  > server, set `input.value` then dispatch the `input` and `change` events.
+- **Quit**: two variants. In a view's toolbar, "Quitter" closes the **host tab** (`fermetureAction`
+  injected by `HomeView`, §17). In the **Fichier ▸ Quitter** menu of `HomeView`, the action closes the
+  **browser tab** (`window.close()`, with an end screen as fallback — browsers only allow
+  `window.close()` for a tab opened by script).
+
 ---
 
 ## 9. Tabs (TabSheet)
@@ -343,20 +371,53 @@ Two families, both `Dialog` with `setDraggable(true).setResizable(true)`, title 
 
 ---
 
-## 13. CSS / theme
+## 13. CSS, theme and theme system
 
-- **Single file** `app.css`, imported by `@StyleSheet("styles/app.css")` on every view.
+### 13.1 Single stylesheet (`app.css`)
+
+- **Location**: `src/main/frontend/styles/app.css` — **bundled by the build** (Vite), not served by
+  URL. Declared **once**, globally, by `@CssImport("./styles/app.css")` on `Application` (which
+  implements `AppShellConfigurator`). **A view carries no style annotation** (no more per-view
+  `@StyleSheet`).
 - Organized into **numbered sections** with a table of contents at the top. **Add a new numbered
   section** per feature (follow the existing numbering).
-- **Tokens** in `:root` (prefix `--orpv-*`): surfaces, borders, text, actions. **Reuse** these
-  variables; do not hardcode colors.
-- **Density**: the root class `orpv-body` carries the `--lumo-*` overrides (font size, field height,
-  radii, white field background). Every new view adds `addClassName("orpv-body")`.
+- **Tokens** in `:root` (prefix `--orpv-*`): surfaces, borders, text, actions, toolbar. **Reuse**
+  these variables; do not hardcode colors. Some tokens **derive** from another (e.g. the toolbar
+  reuses the status-bar tones by default: `--orpv-toolbar-bg: var(--orpv-statusbar-bg)`) so it follows
+  the theme automatically.
+- **Density**: the root class `orpv-body` carries the `--lumo-*` overrides (the project uses **Lumo**,
+  not Aura, for density and components; `Aura.STYLESHEET` is imported only as a base). Every new view
+  adds `addClassName("orpv-body")`.
 - **Scoping**: prefix with `.orpv-body` when you need to win over the `display:block` rule on direct
   children (e.g. `.orpv-body .orpv-toolbar { display:flex; }`).
 - Classes named by feature (`orpv-toolbar`, `orpv-tabs`, `lieux-grid`, `accreditation-grid`,
-  `gestion-lieux-dialog`…). No inline style except the occasional `getStyle().set("gap", …)` for
-  layout spacing.
+  `gestion-lieux-dialog`, `editeur-dialog`…). No inline style except the occasional
+  `getStyle().set("gap", …)` for layout spacing.
+
+### 13.2 Theme system (attribute variants)
+
+- **One theme = one file** `src/main/frontend/styles/themes/<name>.css`, also declared via `@CssImport`
+  on `Application` (so bundled). Current themes: `gris_vert`, `bleu_azur`, `vert_emeraude`,
+  `terracotta`, `violet_amethyste`, `bleu_ardoise` (default), `gris`.
+- Each theme **overrides only the `--orpv-*` tokens**, scoped under an **attribute variant**:
+  `html[theme~="<slug>"] { --orpv-… }` (hyphenated slug, e.g. `bleu-ardoise`). Its specificity (0,1,1)
+  beats the `:root` of `app.css` (0,1,0) → the theme wins, and since the tokens sit on `<html>` they
+  propagate everywhere (including the derived toolbar).
+- **Switching** (Help ▸ Theme menu in `HomeView`): set the attribute, remember the choice.
+  ```java
+  // HomeView: JS_APPLIQUER_THEME, parameter $0 = slug
+  "document.documentElement.setAttribute('theme', $0);" +
+  "window.localStorage.setItem('orpv-theme', $0);"
+  ```
+- **Restore on load** (`MainLayout.onAttach`, runs on every navigation): read the remembered slug,
+  otherwise apply the default.
+  ```java
+  "const t = window.localStorage.getItem('orpv-theme') || 'bleu-ardoise';" +
+  "document.documentElement.setAttribute('theme', t);"
+  ```
+- **Add a theme**: create `styles/themes/<name>.css` (a `html[theme~="<slug>"]` block setting the
+  `--orpv-*`), add its `@CssImport` on `Application`, and an `appliquerTheme("<slug>")` entry in the
+  `HomeView` menu.
 
 ---
 
@@ -408,15 +469,26 @@ When in doubt, follow the screenshot's look: white readable field → `readOnly`
 
 ## 18. Build / run / verify
 
-```powershell
-# JDK 25 required (the machine default won't do)
-$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot"
+**Recommended environment: WSL Dev Container** (Compose, image `eclipse-temurin:25-jdk`, JDK 25
+built in — **no `JAVA_HOME` to set**). Inside the container:
 
-.\mvnw.cmd -q compile                 # compile only (quick validation)
-.\mvnw.cmd compile spring-boot:run    # recompile then run (http://localhost:8080)
+```bash
+./mvnw -q compile     # compile only (quick validation)
+./mvnw                # dev (default goal spring-boot:run) → http://localhost:8080
 ```
 
-- **No hot reload**: after a Java change, **stop** the server, **recompile**, **restart**.
+**On the Windows host** (if needed), JDK 25 is required (the machine default won't do):
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot"
+.\mvnw.cmd -q compile
+.\mvnw.cmd
+```
+
+- **Bundled CSS**: since `app.css` and the themes live under `src/main/frontend/styles/` (via
+  `@CssImport`), a style change goes through the **frontend build** (Vite). Re-run `./mvnw` (goal
+  `build-frontend`) to re-bundle if needed; a theme that fails to apply is almost always a stale bundle.
+- **No Java hot reload**: after a Java change, **stop** the server, **recompile**, **restart**.
 - Visual verification: open `http://localhost:8080/home`, open the view's tab, compare to the
   screenshot. (Playwright MCP can automate navigation/screenshots if available.)
 - ⚠ The IDE (Java language server) may run on an older JDK and wrongly flag `Stream.toList()` as
@@ -449,13 +521,15 @@ $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot"
 - Reuse the helpers (§7) and patterns (§8–§11) **before** inventing.
 - Name/write everything **in French** (UI, methods, variables, comments).
 - Factor common code into **generic**, reusable helpers.
-- Put all styling in `app.css`, with the `--orpv-*` tokens.
+- Put **structural** styling in `app.css` (`--orpv-*` tokens); **palettes** go in
+  `styles/themes/<name>.css` (attribute variants, §13).
 - Simulate data and mark the future wiring point (§14).
 - Compile (`mvnw`) and fix until green; report state honestly (compiled / verified / untested).
 
 **DON'T**
 - ❌ Don't introduce React/Hilla or another UI framework.
-- ❌ Don't create a second CSS file or inline styles (except the occasional `gap`).
+- ❌ Don't create an **ad-hoc** CSS file or inline styles (except the occasional `gap`): structure goes
+  in `app.css`, palettes in theme variants (§13). Don't reintroduce per-view `@StyleSheet`.
 - ❌ Don't turn a view into a window/`Dialog`: a view is a `Div` **body** opened as a tab (unless the
   screenshot is explicitly a **modal window**).
 - ❌ Don't wire persistence/database without an explicit request.

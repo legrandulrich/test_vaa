@@ -20,6 +20,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 
+import com.example.views.shared.VueFormulaire;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 
@@ -46,6 +48,10 @@ public class HomeView extends Div {
     /** Titre de l'onglet « Gestion des unités ». */
     private static final String TITRE_GESTION_UNITES =
             "Système de la recherche - Gestion des organismes pourvoyeurs";
+
+    /** Titre de l'onglet « Chercheur » (identité numérique). */
+    private static final String TITRE_CHERCHEUR =
+            "Système de la recherche - Identité numérique d'un chercheur";
 
     /**
      * Applique un thème : positionne l'attribut {@code theme} sur l'élément racine
@@ -91,6 +97,10 @@ public class HomeView extends Div {
         gestionUnitesItem.addClickListener(event ->
                 ouvrirOnglet(TITRE_GESTION_UNITES, new Tcmgorg1MainView()));
 
+        Span chercheurItem = elementMenu("Chercheur");
+        chercheurItem.addClickListener(event ->
+                ouvrirOnglet(TITRE_CHERCHEUR, new TcmgorgChercheurMainView()));
+
         Span pilotageItem = elementMenu("Pilotage");
         attacherMenuPilotage(pilotageItem);
 
@@ -100,7 +110,7 @@ public class HomeView extends Div {
         Div barre = new Div(
                 fichierItem,
                 elementMenu("Projet"),
-                elementMenu("Chercheur"),
+                chercheurItem,
                 elementMenu("Grp. recherche"),
                 gestionUnitesItem,
                 pilotageItem,
@@ -291,8 +301,9 @@ public class HomeView extends Div {
             mettreAJourAffichage();
         };
         boutonFermer.addClickListener(event -> fermerOnglet.run());
-        if (contenu instanceof Tcmgorg1MainView gopView) {
-            gopView.setFermetureAction(fermerOnglet);
+        // Toute vue de formulaire peut fermer son propre onglet via « Quitter ».
+        if (contenu instanceof VueFormulaire vue) {
+            vue.setFermetureAction(fermerOnglet);
         }
 
         mettreAJourAffichage();

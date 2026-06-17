@@ -4,22 +4,21 @@
 
 ## 1. Vision
 
-The expense management application enables employees to submit expenses for reimbursement while providing managers with the ability to review and approve submissions. The system tracks the entire lifecycle of expense claims from submission through approval, maintaining receipt documentation and providing visibility into spending patterns through dashboards. Success is achieved when employees can easily submit and track their expense claims, managers can efficiently review and approve submissions, and the organization has clear visibility into departmental spending.
+**SIRUL** (Système de la recherche, Université Laval) is being migrated from legacy **Oracle Forms** screens to a modern **Java / Vaadin Flow** web application. Each Oracle Forms screen is reproduced faithfully — same layout, same retro-administrative look, same interaction logic — on a maintainable server-side Java stack.
+
+Several people work on the migration, so **consistency with the reference view and the migration guide matters more than inventiveness**. Success is achieved when each migrated screen matches its Oracle Forms screenshot and follows the shared conventions.
 
 ## 2. Users
 
-**Employees** can submit expense reports, upload receipt documentation, track the status of their claims, and view their submission history.
+Research-administration staff at Université Laval who manage providers (organismes pourvoyeurs), places (lieux), categories, accreditations and related research-funding data through the migrated screens.
 
-**Managers** review pending expenses submitted by their team members, approve or reject submissions, add comments, and view approval workflows.
+## 3. Scope & constraints
 
-**Administrators** configure approval policies, manage users and roles, and access reporting dashboards to analyze spending trends across the organization.
-
-## 3. Constraints
-
-- All data must be stored within the application database
-- Authentication required for all users
-- Approval workflows are internal to the system
-- Receipt uploads stored locally within the application
+- **In scope**: faithful migration of Oracle Forms screens to Vaadin Flow views; the shared chrome (toolbar, tabs, lookup dialogs, status bar) and a switchable visual theme system.
+- **Server-side Vaadin Flow only** (Java) — no React/Hilla, no other UI framework.
+- All UI text, method names, variables and comments are **in French**.
+- **No persistence yet**: list/grid data is simulated (`xxxSimules()`), which isolates the future database wiring point. Do not wire a database without an explicit request.
+- The **authoritative, detailed build specification** is the migration guide (helpers, conventions, patterns).
 
 ---
 
@@ -27,6 +26,7 @@ The expense management application enables employees to submit expenses for reim
 
 - [Spec README](README.md) — process overview and workflow
 - [Architecture](architecture.md) — technology stack and application structure
-- [Design System](design-system.md) — theme, component usage, and visual standards
+- [Design System](design-system.md) — theme, tokens, component usage
 - [Use Case Template](use-cases/use-case-template.md) — template for feature specifications
-- [Data Model](datamodel/datamodel.md) — entity definitions and relationships
+- [Data Model](datamodel/datamodel.md) — domain entities (currently simulated)
+- [Migration guide (authoritative)](../src/main/java/com/example/views/specification.fr.md) — the detailed build spec (FR; EN mirror alongside)

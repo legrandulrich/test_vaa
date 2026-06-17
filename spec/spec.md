@@ -1,1 +1,1 @@
-An expense management application with expense submission, approval workflows, receipt uploads, and reporting dashboards.
+SIRUL — migration of legacy Oracle Forms screens (Université Laval research administration) to a Java / Vaadin Flow application, keeping the same theme and construction logic across every screen. The detailed, authoritative build guide is `src/main/java/com/example/views/specification.fr.md` (French; English mirror alongside).
