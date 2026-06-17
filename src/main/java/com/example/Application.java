@@ -13,13 +13,13 @@ import com.vaadin.flow.component.page.AppShellConfigurator;
 // la structure et les valeurs par défaut ; chaque thème est une variante d'attribut
 // (html[theme~="..."]) activée via l'attribut « theme » (cf. HomeView/MainLayout).
 @CssImport("./styles/app.css")
-@CssImport("./styles/themes/theme1.css")
-@CssImport("./styles/themes/theme3.css")
-@CssImport("./styles/themes/theme4.css")
-@CssImport("./styles/themes/theme5.css")
-@CssImport("./styles/themes/theme6.css")
-@CssImport("./styles/themes/theme9.css")
-@CssImport("./styles/themes/theme10.css")
+@CssImport("./styles/themes/gris_vert.css")
+@CssImport("./styles/themes/bleu_azur.css")
+@CssImport("./styles/themes/vert_emeraude.css")
+@CssImport("./styles/themes/terracotta.css")
+@CssImport("./styles/themes/violet_amethyste.css")
+@CssImport("./styles/themes/bleu_ardoise.css")
+@CssImport("./styles/themes/gris.css")
 public class Application implements AppShellConfigurator {
 
     public static void main(String[] args) {
