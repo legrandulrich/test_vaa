@@ -251,11 +251,38 @@ public final class BarreOutils extends Div {
     }
 
     /**
-     * « Imprimer » : déclenche la boîte de dialogue d'impression du navigateur
-     * pour la fenêtre courante.
+     * « Imprimer » : effectue une vraie capture d'écran de l'onglet courant via
+     * l'API Screen Capture du navigateur ({@code getDisplayMedia}), puis
+     * télécharge l'image au format PNG. Le navigateur impose une autorisation et
+     * un choix de la source à chaque appel ; {@code preferCurrentTab} propose
+     * l'onglet courant par défaut.
      */
     private void imprimer() {
-        getUI().ifPresent(ui -> ui.getPage().executeJs("window.print()"));
+        getUI().ifPresent(ui -> ui.getPage().executeJs(
+                "(async () => {"
+                + "  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {"
+                + "    alert('La capture d\\'écran n\\'est pas supportée par ce navigateur.');"
+                + "    return;"
+                + "  }"
+                + "  let flux;"
+                + "  try {"
+                + "    flux = await navigator.mediaDevices.getDisplayMedia({"
+                + "      video: true, audio: false, preferCurrentTab: true"
+                + "    });"
+                + "  } catch (e) { return; }"   // utilisateur a annulé le partage
+                + "  const video = document.createElement('video');"
+                + "  video.srcObject = flux;"
+                + "  await video.play();"
+                + "  const toile = document.createElement('canvas');"
+                + "  toile.width = video.videoWidth;"
+                + "  toile.height = video.videoHeight;"
+                + "  toile.getContext('2d').drawImage(video, 0, 0);"
+                + "  flux.getTracks().forEach(t => t.stop());"
+                + "  const lien = document.createElement('a');"
+                + "  lien.download = 'capture-' + new Date().toISOString().replace(/[:.]/g, '-') + '.png';"
+                + "  lien.href = toile.toDataURL('image/png');"
+                + "  lien.click();"
+                + "})();"));
     }
 
     // ------------------------------------------------------------------
