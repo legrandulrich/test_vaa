@@ -235,6 +235,23 @@
 /* --- En-tête d'onglet : libellé + bouton de fermeture --- */
 .orpv-tab-close {
     color: var(--orpv-tab-close-color);
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+    padding: 0;
+    margin: 0;
+}
+
+.orpv-tab-close::part(prefix),
+.orpv-tab-close::part(label) {
+    margin: 0;
+}
+
+.orpv-tab-close vaadin-icon {
+    width: 12px;
+    height: 12px;
+    padding: 0;
 }
 
 .orpv-tab-close:hover {
@@ -247,7 +264,19 @@
 }
 
 .orpv-tab-header {
-    height: 20px;
+    height: 16px;
+}
+
+/* Bandeau d'onglets principal : on resserre le padding vertical des onglets
+   pour réduire l'épaisseur de la barre de titre. */
+.orpv-main-tabs::part(tabs) {
+    min-height: 0;
+}
+
+.orpv-main-tabs vaadin-tab {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    min-height: 0;
 }
 
 
@@ -361,7 +390,7 @@
 
 /* Corps du formulaire — porte les variables de densité. */
 .orpv-body {
-    padding: 16px 18px 20px;
+    padding: 0 18px 20px;
 
     /* Aspect compact, coins peu arrondis, champs blancs encadrés */
     --lumo-font-size-m: 13px;
@@ -394,7 +423,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 1px;
-    padding: 3px 5px;
+    padding: 6px 7px;
     background: var(--orpv-toolbar-bg);
     border: 1px solid var(--orpv-toolbar-border);
     border-radius: 3px;
@@ -402,9 +431,9 @@
 }
 
 .orpv-tool-button {
-    width: 30px;
-    min-width: 30px;
-    height: 28px;
+    width: 38px;
+    min-width: 38px;
+    height: 36px;
     padding: 0;
     border: 1px solid transparent;
     border-radius: 3px;
@@ -424,15 +453,15 @@
 
 /* Icône SVG (servie depuis /icons) : taille fixe, couleurs d'origine. */
 .orpv-tool-icon {
-    width: 20px;
-    height: 20px;
+    width: 26px;
+    height: 26px;
     display: block;
 }
 
 /* Séparateur vertical entre groupes de boutons. */
 .orpv-toolbar-sep {
     width: 1px;
-    height: 22px;
+    height: 28px;
     margin: 0 5px;
     background: var(--orpv-toolbar-sep);
     box-shadow: 1px 0 0 var(--orpv-toolbar-highlight);
